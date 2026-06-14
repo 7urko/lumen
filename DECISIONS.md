@@ -39,6 +39,10 @@ law forces: **fiat on-ramp (cards→crypto) and KYC/AML** — both regulated, bo
   swap for a self-hosted node later. Not a product integration.
 - **Started:** `web/lib/chain.ts` + `/live` — real Base balances & on-chain Chainlink prices via viem,
   zero SaaS. (See WORKLOG.)
+- **Key management v0 (testnet):** `web/lib/account.ts` + `web/lib/passkey.ts` + `/account` — a real
+  browser-generated account on Base Sepolia, WebAuthn passkey unlock, real sign+broadcast. **Testnet
+  only, not hardened.** Next: passkey-PRF-encrypted storage → ERC-4337 smart account (on-chain passkey
+  verification) + paymaster + social recovery, then **audit before mainnet**.
 
 ## Implied by the above (recommended defaults, not yet ratified)
 

@@ -25,6 +25,7 @@ const NAV: Array<{ group: string; items: Array<{ href: string; label: string; ic
   { group: "Manage", items: [
     { href: "/contacts", label: "Contacts", icon: "users" },
     { href: "/alerts", label: "Alerts", icon: "bell" },
+    { href: "/account", label: "Account", icon: "key" },
     { href: "/security", label: "Security", icon: "shield" },
   ]},
 ];

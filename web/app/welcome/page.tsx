@@ -31,7 +31,7 @@ export default function WelcomeScreen() {
       {step === "smart" && (
         <div className="card glass" style={{ textAlign: "center" }}>
           <p className="muted" style={{ marginBottom: 16 }}>Register a passkey to secure your smart account — no seed phrase to lose.</p>
-          <button className="btn btn-primary btn-block" onClick={() => enter("Smart account ready")}>Register passkey &amp; continue</button>
+          <button className="btn btn-primary btn-block" onClick={() => router.push("/account")}>Set up a real testnet account →</button>
           <button className="faint" style={{ marginTop: 12 }} onClick={() => setStep("choice")}>← Back</button>
         </div>
       )}

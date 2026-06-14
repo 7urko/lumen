@@ -24,6 +24,7 @@ const ICONS: Record<string, JSX.Element> = {
   trash: <path d="M6 7h12M9 7V5h6v2M8 7l1 12h6l1-12" />,
   faceid: <><path d="M4 8V5h3M17 4h3v3M20 16v3h-3M7 20H4v-3" /><path d="M9 10v1.5M15 10v1.5M12 9.5v3l-1 1M9.5 15.5a3.5 3.5 0 0 0 5 0" /></>,
   spark: <path d="M12 3l2.2 6.3L20.5 12l-6.3 2.2L12 20.5l-2.2-6.3L3.5 12l6.3-2.2L12 3Z" />,
+  key: <><circle cx="8" cy="15" r="4" /><path d="m11 12 8-8 2 2-2 2 2 2-2.5 2.5L16 12.5 13 15" /></>,
   globe: <><circle cx="12" cy="12" r="9" /><path d="M3 12h18M12 3c2.6 2.6 2.6 15.4 0 18M12 3c-2.6 2.6-2.6 15.4 0 18" /></>,
 };
 

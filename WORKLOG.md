@@ -35,6 +35,26 @@
 
 ## Session log
 
+### 2026-06-14 — Self-built **key management v0** — a real wallet on Base Sepolia
+
+First real, self-built, non-custodial account. No third party — WebAuthn + WebCrypto are browser-
+native, viem signs and broadcasts directly to the node.
+
+- **`web/lib/account.ts`** — generates a real key in the browser (viem `generatePrivateKey`), reads
+  live Sepolia balance, and **signs + broadcasts a real testnet tx** (`sendTestEth`).
+- **`web/lib/passkey.ts`** — real **WebAuthn** register/verify (platform passkey, e.g. Windows Hello)
+  as the unlock gate.
+- **`/account` page** — create wallet, add passkey protection, address + QR, live Sepolia balance,
+  faucet link, and a real "Sign & send" form. Added to sidebar (Manage › Account); `/welcome`'s
+  smart-account option now points here.
+- **Verified live on this machine:** created a real account (`0x3e1d…e0F8`), QR rendered, and the
+  Sepolia balance read returned 0.00000 ETH (correct — unfunded). No tx was sent (left to the user).
+- **Security posture (explicit):** v0 stores the key locally in the browser — **testnet only, NOT
+  hardened for real funds.** Next milestone hardens it: passkey-PRF-encrypted storage, then an
+  **ERC-4337 smart account** whose signer is the passkey verified on-chain (the real "no seed phrase"
+  account), with gasless paymaster + social recovery. Audit before any mainnet.
+- No new deps (viem already present). `next build` green (24 routes).
+
 ### 2026-06-14 — First **real, self-built** on-chain layer (viem, no SaaS)
 
 Direction set: **self-build everything except the legally-forced pieces** (fiat on-ramp, KYC/AML).
