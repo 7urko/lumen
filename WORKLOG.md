@@ -35,6 +35,26 @@
 
 ## Session log
 
+### 2026-06-14 — First **real, self-built** on-chain layer (viem, no SaaS)
+
+Direction set: **self-build everything except the legally-forced pieces** (fiat on-ramp, KYC/AML).
+No third-party SaaS (no Privy/Alchemy/etc.) — we run our own infra + audited open-source libraries.
+Safety rule recorded: self-built ≠ home-rolled crypto — integrate audited OSS primitives, build on
+testnet, audit before mainnet.
+
+- **New `web/lib/chain.ts`** (viem) — public clients for **Base mainnet + Base Sepolia**, real native
+  + ERC-20 balance reads (multicall), and **ETH/USD straight from an on-chain Chainlink feed** (an RPC
+  read, not a price API). RPC endpoint is a single env var (`NEXT_PUBLIC_BASE_RPC`) → swap the public
+  node for your own anytime. Read-only (signing waits for real key management).
+- **New `/live` page** — paste any address, pick the network, see real balances + USD values + a
+  Basescan link. Added to the sidebar (Explore › Live chain).
+- **Verified live on this machine:** read vitalik.eth on Base mainnet — 3.124 ETH + real USDC/DAI,
+  ≈ $5.4k total, ETH price from Chainlink, at a live block height. (Sandbox can't reach external RPCs,
+  so the live check was done in-browser.)
+- viem added to `web` deps; `next build` green (23 routes).
+- **Note on "no third party":** a blockchain *node* is unavoidable. Public RPC now = dev convenience,
+  not a product integration; the fully self-hosted version is running your own node (later ops work).
+
 ### 2026-06-14 — Web app reaches **feature parity** with the demo (8 screens ported)
 
 The first Next.js cut had only 6 screens; ported the remaining 8 so the web app matches the demo.

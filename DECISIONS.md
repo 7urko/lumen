@@ -28,6 +28,18 @@ shared `core` package (zero DOM). Lowest-risk, highest-leverage move and it need
 the dev machine yet. **Done** — see `core/` (formatters, P&L, sparkline math, Scam Shield), fully
 unit-tested (37 tests green).
 
+### 1.5 Build posture → **self-built, no third-party SaaS** (decided 2026-06-14)
+Build everything in-house with our own infrastructure + **audited open-source libraries** (viem for
+chain access, Uniswap contracts for swaps, WebAuthn + ERC-4337/Safe contracts for smart accounts).
+**No** SaaS middlemen (Privy, Alchemy, Blockaid, etc.). The **only** third parties are the ones the
+law forces: **fiat on-ramp (cards→crypto) and KYC/AML** — both regulated, both deferred.
+- **Hard rule:** self-built ≠ home-rolled cryptography. We *integrate and run* audited OSS primitives;
+  we do not invent key handling. Build/test on **testnet**, get a **security audit** before mainnet.
+- **Node:** talking to the chain needs a node. Public RPC for now (one env var, `NEXT_PUBLIC_BASE_RPC`);
+  swap for a self-hosted node later. Not a product integration.
+- **Started:** `web/lib/chain.ts` + `/live` — real Base balances & on-chain Chainlink prices via viem,
+  zero SaaS. (See WORKLOG.)
+
 ## Implied by the above (recommended defaults, not yet ratified)
 
 These follow from the roadmap + the decisions above. Flagged here so they're easy to confirm or

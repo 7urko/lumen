@@ -20,6 +20,7 @@ const NAV: Array<{ group: string; items: Array<{ href: string; label: string; ic
     { href: "/markets", label: "Markets", icon: "markets" },
     { href: "/insights", label: "Insights", icon: "insights" },
     { href: "/copilot", label: "Copilot", icon: "chat" },
+    { href: "/live", label: "Live chain", icon: "globe" },
   ]},
   { group: "Manage", items: [
     { href: "/contacts", label: "Contacts", icon: "users" },
