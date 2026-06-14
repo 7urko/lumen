@@ -35,6 +35,44 @@
 
 ## Session log
 
+### 2026-06-14 — Web app reaches **feature parity** with the demo (8 screens ported)
+
+The first Next.js cut had only 6 screens; ported the remaining 8 so the web app matches the demo.
+
+- **New core modules** (pure, tested): `buy.ts` (`computeBuyQuote`), `swap.ts` (`computeSwap`),
+  `portfolio.stakeTotals`, `copilot.ts` (the local intent engine — `copilotReply`/`parseSend`,
+  returning **declarative route actions** instead of DOM callbacks), and mock `genSeed`/`genAddress`
+  + `DEMO_ALERTS`/`DEMO_GUARDIANS` fixtures. Core test count **37 → 45, all green**.
+- **WalletProvider** extended: alerts / guardians / contacts state + `addAlert`/`toggleAlert`/
+  `removeAlert`/`addGuardian`/`removeGuardian`/`addContact`, and `buy`/`swap`/`stake` actions that
+  mutate balances + history. `send` prefill now flows via `/send?token=&amount=&to=` query params.
+- **New screens:** `/buy`, `/swap`, `/earn`, `/alerts`, `/contacts`, `/security`, `/copilot`,
+  plus the entry flows `/welcome` (smart-account / recovery-phrase / import) and `/unlock` (Face-ID
+  style). Sidebar reorganised into Wallet / Trade / Explore / Manage groups; topbar gains Copilot +
+  Lock buttons.
+- **Verified:** `tsc` clean, `next build` green (**22 routes**), every route 200. Confirmed live on
+  this machine — the Copilot correctly flags `claim-airdrop.lumen` as a drainer and reports the
+  portfolio value/P&L, all from `@lumen/core`.
+
+### 2026-06-14 — PWA layer, CI, and **git** (project now under version control)
+
+Hardened the web app and put everything under source control.
+
+- **PWA (roadmap Phase 2.2 — "web-launch-critical"):** added `web/app/manifest.ts`
+  (`/manifest.webmanifest`), generated app icons (`icon-192/512`, maskable-512, `apple-icon`,
+  scalable `icon.svg`), a production **service worker** (`web/public/sw.js`: offline shell +
+  cache-first assets, network-first navigations → cached `/offline`), an `/offline` page, and
+  PWA metadata (theme-color `#06060c`, apple-web-app, viewport). SW registers in production only.
+  Verified: `next build` green (13 routes incl. manifest/icons/offline); every PWA endpoint serves
+  200 with the right content-type.
+- **CI:** `.github/workflows/ci.yml` — on push/PR runs `npm ci`, core unit tests, web typecheck,
+  and web build (Node 22).
+- **Git initialised** (was not a repo). Initial commit `fe9b8b1` — **69 files**, `node_modules`/
+  `.next` excluded. *(Note: git can't run against the sandbox mount — lock files fail there — so it
+  was run on this machine via `_gitinit.bat`, using the Windows Git install.)* No remote/push.
+- Minor known cruft to tidy later: `core/package-lock.json` (redundant now that the root lock is
+  authoritative under workspaces) and the one-off `_gitinit.bat` got committed.
+
 ### 2026-06-14 — Built the real **Next.js web app** (`web/`), wired to `@lumen/core`
 
 Turned the monorepo into a running product. Added a **Next.js 15 + TypeScript** app (App Router,

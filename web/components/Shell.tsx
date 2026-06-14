@@ -1,12 +1,14 @@
 "use client";
 
 import type { ReactNode } from "react";
+import { useRouter } from "next/navigation";
 import { Sidebar } from "./Sidebar";
 import { Icon } from "./icons";
 import { useWallet } from "./WalletProvider";
 
 export function Shell({ children }: { children: ReactNode }) {
   const { username, toast, showToast } = useWallet();
+  const router = useRouter();
   return (
     <div className="shell">
       <Sidebar />
@@ -17,10 +19,10 @@ export function Shell({ children }: { children: ReactNode }) {
             <div className="wallet-user">{username}</div>
           </div>
           <div className="topbar-actions">
-            <button className="iconbtn" aria-label="Scan" onClick={() => showToast("Scanner is a demo control")}>
-              <Icon name="scan" size={18} />
+            <button className="iconbtn" aria-label="Copilot" onClick={() => router.push("/copilot")}>
+              <Icon name="spark" size={18} />
             </button>
-            <button className="iconbtn" aria-label="Lock" onClick={() => showToast("Wallet would lock here")}>
+            <button className="iconbtn" aria-label="Lock wallet" onClick={() => { showToast("Locking wallet…"); router.push("/unlock"); }}>
               <Icon name="lock" size={18} />
             </button>
           </div>

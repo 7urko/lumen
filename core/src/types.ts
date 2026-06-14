@@ -112,3 +112,55 @@ export interface HistoryEntry {
   /** Epoch ms. */
   ts: number;
 }
+
+/** A saved price alert. */
+export interface Alert {
+  id: number;
+  sym: string;
+  dir: "above" | "below";
+  price: number;
+  on: boolean;
+}
+
+/** A social-recovery guardian. */
+export interface Guardian {
+  id: number;
+  name: string;
+  handle: string;
+}
+
+/** Payment method for the Buy on-ramp. */
+export type BuyMethod = "card" | "apple";
+
+/** A fiat on-ramp quote. */
+export interface BuyQuote {
+  feeRate: number;
+  fee: number;
+  net: number;
+  tokenAmt: number;
+}
+
+/** A token-to-token swap quote. */
+export interface SwapQuote {
+  rate: number;
+  toAmt: number;
+  /** price impact, as a percent */
+  impact: number;
+  minReceived: number;
+  fee: number;
+  fromUsd: number;
+  toUsd: number;
+}
+
+/** A Copilot action the UI can route to (replaces the demo's DOM callbacks). */
+export interface CopilotAction {
+  label: string;
+  route?: string;
+  prefill?: { sym?: string; amount?: string; recipient?: string };
+}
+
+/** A Copilot reply: an HTML snippet + an optional follow-up action. */
+export interface CopilotReply {
+  html: string;
+  action?: CopilotAction;
+}

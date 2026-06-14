@@ -5,22 +5,27 @@ import { usePathname } from "next/navigation";
 import { Icon } from "./icons";
 
 const NAV: Array<{ group: string; items: Array<{ href: string; label: string; icon: string }> }> = [
-  {
-    group: "Wallet",
-    items: [
-      { href: "/", label: "Home", icon: "home" },
-      { href: "/send", label: "Send", icon: "send" },
-      { href: "/receive", label: "Receive", icon: "receive" },
-      { href: "/activity", label: "Activity", icon: "activity" },
-    ],
-  },
-  {
-    group: "Explore",
-    items: [
-      { href: "/markets", label: "Markets", icon: "markets" },
-      { href: "/insights", label: "Insights", icon: "insights" },
-    ],
-  },
+  { group: "Wallet", items: [
+    { href: "/", label: "Home", icon: "home" },
+    { href: "/send", label: "Send", icon: "send" },
+    { href: "/receive", label: "Receive", icon: "receive" },
+    { href: "/activity", label: "Activity", icon: "activity" },
+  ]},
+  { group: "Trade", items: [
+    { href: "/buy", label: "Buy", icon: "buy" },
+    { href: "/swap", label: "Swap", icon: "swap" },
+    { href: "/earn", label: "Earn", icon: "earn" },
+  ]},
+  { group: "Explore", items: [
+    { href: "/markets", label: "Markets", icon: "markets" },
+    { href: "/insights", label: "Insights", icon: "insights" },
+    { href: "/copilot", label: "Copilot", icon: "chat" },
+  ]},
+  { group: "Manage", items: [
+    { href: "/contacts", label: "Contacts", icon: "users" },
+    { href: "/alerts", label: "Alerts", icon: "bell" },
+    { href: "/security", label: "Security", icon: "shield" },
+  ]},
 ];
 
 export function Sidebar() {
@@ -51,6 +56,7 @@ export function Sidebar() {
         ))}
       </nav>
       <div className="sb-foot">
+        <Link href="/welcome" className="sb-demo" style={{ display: "block", marginBottom: 8 }}>View onboarding flow →</Link>
         <div className="sb-demo">Demo · mock data · no real funds</div>
       </div>
     </aside>

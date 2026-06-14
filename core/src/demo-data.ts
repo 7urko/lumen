@@ -65,3 +65,39 @@ export const DEMO_HISTORY: HistoryEntry[] = [
   { dir: "out", sym: "SOL",   amount: 12.0,   address: "5Gw8...Qm3v",  ts: daysAgo(6) },
   { dir: "in",  sym: "MATIC", amount: 500.0,  address: "0x12ab...ff09", ts: daysAgo(9) },
 ];
+
+import type { Alert, Guardian } from "./types";
+
+export const DEMO_ALERTS: Alert[] = [
+  { id: 1, sym: "BTC", dir: "above", price: 70000, on: true },
+  { id: 2, sym: "ETH", dir: "below", price: 3000, on: true },
+  { id: 3, sym: "SOL", dir: "above", price: 200, on: false },
+];
+
+export const DEMO_GUARDIANS: Guardian[] = [
+  { id: 1, name: "Alice Nguyen", handle: "alice.lumen" },
+  { id: 2, name: "Maya Okafor", handle: "maya.lumen" },
+];
+
+/** BIP39-flavoured word list for the mock recovery phrase (NOT real entropy). */
+export const WORDLIST = [
+  "ribbon", "harvest", "lunar", "copper", "meadow", "tunnel", "crystal", "ember",
+  "fabric", "glide", "hollow", "ivory", "jungle", "kettle", "lantern", "marble",
+  "nectar", "orbit", "pebble", "quiver", "ripple", "saddle", "timber", "velvet",
+  "willow", "zephyr", "anchor", "breeze", "cinder", "drift", "echo", "frost",
+];
+
+/** Mock 12-word recovery phrase — for the UI demo only; controls nothing. */
+export function genSeed(): string[] {
+  const words: string[] = [];
+  for (let i = 0; i < 12; i++) words.push(WORDLIST[Math.floor(Math.random() * WORDLIST.length)]!);
+  return words;
+}
+
+/** Mock 0x address — random hex, NOT derived from any key. */
+export function genAddress(): string {
+  const hex = "0123456789abcdef";
+  let s = "0x";
+  for (let i = 0; i < 40; i++) s += hex[Math.floor(Math.random() * 16)];
+  return s;
+}

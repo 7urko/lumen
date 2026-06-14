@@ -29,8 +29,10 @@ npm run typecheck -w web
 
 ## How it's wired
 
-- **`app/`** — routes: `/` (Dashboard), `/send`, `/receive`, `/activity`, `/insights`, `/markets`.
-  Each is a client component that reads wallet state from a context and calls `@lumen/core`.
+- **`app/`** — routes: `/` (Dashboard), `/send`, `/receive`, `/activity`, `/insights`, `/markets`,
+  `/buy`, `/swap`, `/earn`, `/alerts`, `/contacts`, `/security`, `/copilot`, plus the entry flows
+  `/welcome` (onboarding) and `/unlock`. Each is a client component that reads wallet state from a
+  context and calls `@lumen/core`. (Full feature parity with the original static demo.)
 - **`components/WalletProvider.tsx`** — in-memory wallet state (tokens, history, directory, toast,
   a mock `send`). The single place to later swap mock data for real provider/indexer calls.
 - **`components/Sparkline.tsx`** — renders `@lumen/core`'s `sparklinePath` geometry as SVG (the

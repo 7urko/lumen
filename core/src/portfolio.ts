@@ -38,3 +38,10 @@ export function computePnl(tokens: Token[]): Pnl {
     cost,
   };
 }
+
+/** Total staked value and projected yearly yield. */
+export function stakeTotals(tokens: Token[]): { stakedUsd: number; yearly: number } {
+  const stakedUsd = tokens.reduce((s, t) => s + t.staked * t.price, 0);
+  const yearly = tokens.reduce((s, t) => s + t.staked * t.price * (t.apy / 100), 0);
+  return { stakedUsd, yearly };
+}

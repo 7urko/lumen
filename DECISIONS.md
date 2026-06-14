@@ -38,7 +38,9 @@ change before code depends on them:
   Coinbase Smart Wallet / ZeroDev — to be evaluated). Social recovery via guardian threshold.
 - **Stack (1.4):** React + TypeScript, **Next.js** ✓ (scaffolded — `web/` workspace, App Router,
   React 19, consuming `@lumen/core`). Monorepo via **npm workspaces** (`core` ✓ / `web` ✓; `api` +
-  placeholder `mobile` still to come). Still to add: TanStack Query + a light store; PWA for "app feel".
+  placeholder `mobile` still to come). **PWA** ✓ (manifest, icons, service worker, offline — Phase 2.2).
+  **Git** ✓ (initial commit) + **CI** ✓ (GitHub Actions: core tests + web typecheck + build).
+  Still to add: TanStack Query + a light store.
 - **Name service:** decide whether `*.lumen` is Lumen's own registry or maps to ENS.
 
 ## Open / blocked decisions
