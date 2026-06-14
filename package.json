@@ -1,0 +1,12 @@
+{
+  "name": "lumen",
+  "version": "0.1.0",
+  "private": true,
+  "workspaces": ["core", "web"],
+  "scripts": {
+    "dev": "npm run dev -w web",
+    "build": "npm run build -w web",
+    "test": "npm test -w @lumen/core",
+    "typecheck": "npm run typecheck -w @lumen/core && npm run typecheck -w web"
+  }
+}
