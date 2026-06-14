@@ -35,6 +35,27 @@
 
 ## Session log
 
+### 2026-06-14 — Real **ERC-4337 smart account** (passkey-owned, no seed phrase)
+
+Started the real "no seed phrase" account — the hardened successor to the v0 EOA.
+
+- **`web/lib/smart-account.ts`** — a passkey-owned **Coinbase Smart Wallet** (audited, open-source
+  contract already on Base; using it is a standard, not a SaaS) via **viem's account-abstraction**:
+  `createWebAuthnCredential` (real P-256 passkey) → `toWebAuthnAccount` → `toCoinbaseSmartAccount`.
+  **No private key stored** — only the passkey's public key + id; the passkey lives in the platform
+  authenticator and is verified **on-chain**. Address is counterfactual (deploys on first tx). Reads
+  (address/deployment/balance) need only the RPC; sending needs a bundler.
+- **`/smart-account` page** — create with a passkey, show the on-chain address + deployment status +
+  balance + bundler status, faucet/explorer links. Sidebar: Manage › Smart account (and the v0 EOA is
+  now "Account").
+- **`BUNDLER.md`** — how to **self-host** the one piece of infra this needs: an open-source ERC-4337
+  bundler (alto/rundler/silius) behind `NEXT_PUBLIC_BUNDLER_URL`. No SaaS.
+- **Verified:** module typechecks against the real viem AA API; `next build` green (25 routes); page
+  renders. The passkey registration (Windows Hello) → real address, and gasless sending (needs the
+  self-hosted bundler), are the user/infra steps — not auto-runnable from here.
+- **Before mainnet:** the smart-account + paymaster + recovery path must be **audited**. All of this
+  stays on **Base Sepolia** until then.
+
 ### 2026-06-14 — Self-built **key management v0** — a real wallet on Base Sepolia
 
 First real, self-built, non-custodial account. No third party — WebAuthn + WebCrypto are browser-
