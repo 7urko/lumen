@@ -21,13 +21,16 @@ const NAV: Array<{ group: string; items: Array<{ href: string; label: string; ic
     { href: "/insights", label: "Insights", icon: "insights" },
     { href: "/copilot", label: "Copilot", icon: "chat" },
     { href: "/live", label: "Live chain", icon: "globe" },
+    { href: "/watch", label: "Watch", icon: "eye" },
   ]},
   { group: "Manage", items: [
     { href: "/contacts", label: "Contacts", icon: "users" },
     { href: "/alerts", label: "Alerts", icon: "bell" },
     { href: "/account", label: "Account", icon: "lock" },
     { href: "/smart-account", label: "Smart account", icon: "key" },
+    { href: "/approvals", label: "Approvals", icon: "ban" },
     { href: "/security", label: "Security", icon: "shield" },
+    { href: "/privacy", label: "Privacy", icon: "eyeoff" },
   ]},
 ];
 

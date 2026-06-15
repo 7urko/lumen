@@ -10,6 +10,8 @@ import {
 import { useWallet } from "@/components/WalletProvider";
 import { Icon } from "@/components/icons";
 import { SwapCard } from "@/components/SwapCard";
+import { RecipientRadar } from "@/components/RecipientRadar";
+import { recordRecipient } from "@/lib/scam-onchain";
 
 const EXPLORER = "https://sepolia.basescan.org";
 
@@ -81,6 +83,7 @@ export default function AccountScreen() {
     setBusy(true);
     try {
       const hash = await sendTestEth(to as Address, amt);
+      recordRecipient(to);
       setTxHash(hash); showToast("Transaction broadcast");
       if (address) setTimeout(() => void refresh(address), 4000);
     } catch (e) { setErr(e instanceof Error ? e.message : "Send failed (is the wallet funded?)"); }
@@ -150,7 +153,7 @@ export default function AccountScreen() {
 
           <div className="card glass" style={{ marginTop: 18 }}>
             <div className="section-title" style={{ marginTop: 0 }}>Send test ETH</div>
-            <div className="field"><label>Recipient</label><input className="input" placeholder="0x…" value={to} onChange={(e) => setTo(e.target.value)} spellCheck={false} /></div>
+            <div className="field"><label>Recipient</label><input className="input" placeholder="0x…" value={to} onChange={(e) => setTo(e.target.value)} spellCheck={false} /><RecipientRadar address={to} /></div>
             <div className="field"><label>Amount (ETH)</label><input className="input" inputMode="decimal" value={amt} onChange={(e) => setAmt(e.target.value)} /></div>
             {err && <div className="hint bad" style={{ marginBottom: 10 }}>{err}</div>}
             {txHash && <div className="hint good" style={{ marginBottom: 10 }}>Broadcast ✓ <a href={`${EXPLORER}/tx/${txHash}`} target="_blank" rel="noopener noreferrer" style={{ color: "var(--accent-2)" }}>view tx →</a></div>}

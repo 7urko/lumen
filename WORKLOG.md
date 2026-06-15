@@ -35,6 +35,27 @@
 
 ## Session log
 
+### 2026-06-14 — **Differentiator features** (safety-first, privacy-first identity)
+
+Product wedge vs MetaMask/Rabby/Phantom: competitors' safety features are usually a paid third party
+(Blockaid/Blowfish) and off by default. Lumen's are **self-built, on by default, and local**. Built
+four, all client-side / on-chain, no SaaS:
+
+- **Scam Shield 2.0** (`lib/scam-onchain.ts` + `components/RecipientRadar.tsx`) — real pre-sign
+  "recipient radar": before you send, a live on-chain check of whether the recipient is a contract or
+  a wallet, its outgoing-tx activity, and whether you've sent there before. Wired into the real
+  `/account` send. Plus an `isUnlimitedApproval` helper.
+- **Approvals & Revoke** (`lib/approvals.ts` + `/approvals`) — lists the wallet's ERC-20 allowances
+  (from on-chain Approval logs), flags **UNLIMITED** ones, one-click **revoke** (approve→0). Baked in
+  (people normally rely on the separate revoke.cash site). Honest limit: public-RPC getLogs range.
+- **Watch any address** (`/watch`) — saved watch-list with real holdings (reuses the chain layer) +
+  on-chain radar (contract/EOA, tx count). Read-only, no import.
+- **Privacy mode** (`lib/privacy.ts` + `/privacy`) — verifiable "no analytics / no tracking / no KYC /
+  keys never leave your device", a list of the ONLY external calls the app makes, and a **Strict mode**
+  toggle that disables the cosmetic ones (the TradingView chart now respects it).
+- Sidebar gains Approvals, Watch, Privacy. Verified: typecheck + `next build` green (28 routes).
+  On-chain execution (revoke, radar reads) runs on the user's machine with the public RPC.
+
 ### 2026-06-14 — Real **on-chain swap** (Uniswap v3 + WETH wrap) on Base Sepolia
 
 Added real token swapping signed by the encrypted vault. No third party — viem + the on-chain
