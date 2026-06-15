@@ -6,9 +6,9 @@ export function GasWidget() {
   const [g, setG] = useState<number | null>(null);
   useEffect(() => {
     let on = true;
-    const load = () => getGasGwei().then((v) => { if (on) setG(v); }).catch(() => {});
-    load();
-    const id = setInterval(load, 20000);
+    const load = async () => { try { const v = await getGasGwei(); if (on) setG(v); } catch { /* non-fatal */ } };
+    void load();
+    const id = setInterval(() => { void load(); }, 20000);
     return () => { on = false; clearInterval(id); };
   }, []);
   if (g == null) return null;

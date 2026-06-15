@@ -9,6 +9,7 @@ import { useWallet } from "./WalletProvider";
 import { GasWidget } from "./GasWidget";
 import { CommandPalette } from "./CommandPalette";
 import { Tour } from "./Tour";
+import { RejectionGuard } from "./RejectionGuard";
 import { applyAccent, getAccentName } from "@/lib/theme";
 
 export function Shell({ children }: { children: ReactNode }) {
@@ -18,6 +19,7 @@ export function Shell({ children }: { children: ReactNode }) {
 
   return (
     <div className="shell">
+      <RejectionGuard />
       <Sidebar />
       <div className="content">
         <header className="topbar">
