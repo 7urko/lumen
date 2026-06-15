@@ -12,7 +12,7 @@ const NAV: Array<{ group: string; items: Array<{ href: string; label: string; ic
     { href: "/activity", label: "Activity", icon: "activity" },
   ]},
   { group: "Trade", items: [
-    { href: "/buy", label: "Buy", icon: "buy" },
+    { href: "/buy", label: "Add funds", icon: "buy" },
     { href: "/swap", label: "Swap", icon: "swap" },
     { href: "/earn", label: "Earn", icon: "earn" },
   ]},

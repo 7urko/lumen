@@ -14,7 +14,7 @@ function seedFor(sym: string): number {
 }
 
 export default function Dashboard() {
-  const { tokens, showToast } = useWallet();
+  const { tokens } = useWallet();
   const total = totalUsd(tokens);
   const pnl = computePnl(tokens);
   const sorted: Token[] = [...tokens].sort((a, b) => (b.balance + b.staked) * b.price - (a.balance + a.staked) * a.price);
@@ -46,8 +46,8 @@ export default function Dashboard() {
       <div className="quick">
         <Link href="/send" className="quickbtn"><span className="ic"><Icon name="send" size={20} /></span><span>Send</span></Link>
         <Link href="/receive" className="quickbtn"><span className="ic"><Icon name="receive" size={20} /></span><span>Receive</span></Link>
-        <button className="quickbtn" onClick={() => showToast("Buy / on-ramp arrives in v1.x")}><span className="ic"><Icon name="buy" size={20} /></span><span>Buy</span></button>
-        <button className="quickbtn" onClick={() => showToast("Swap arrives in v1.x")}><span className="ic"><Icon name="swap" size={20} /></span><span>Swap</span></button>
+        <Link href="/buy" className="quickbtn"><span className="ic"><Icon name="buy" size={20} /></span><span>Add funds</span></Link>
+        <Link href="/swap" className="quickbtn"><span className="ic"><Icon name="swap" size={20} /></span><span>Swap</span></Link>
       </div>
 
       <div className="section-title">Assets</div>

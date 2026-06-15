@@ -9,12 +9,14 @@
 
 ## Decided (2026-06-14)
 
-### 1.1 Custody model → **Non-custodial**
-Users hold their own keys; Lumen never takes custody of crypto or fiat. This is the lightest
-licensing path (avoids money-transmitter / MSB-class obligations) and matches Lumen's product
-pitch. Fiat, when added (Buy), must flow entirely through a **licensed on-ramp partner** so the
-partner — not Lumen — is the regulated entity.
-*Still required:* written confirmation of posture with counsel before holding real funds.
+### 1.1 Custody & compliance → **Non-custodial, no KYC** (updated 2026-06-14)
+Users hold their own keys; Lumen never takes custody of crypto or fiat, and **collects no KYC** — the
+model of MetaMask / Rabby / Phantom. Lumen is software, not a money service, so it can run without
+registering users. To stay in that lane: **no built-in fiat processing** (the Buy screen links out to
+external on-ramps that KYC their own users), **no in-app yield product** (Earn is informational only),
+and swaps stay non-custodial (route to a DEX). Full reasoning + the pre-launch to-dos (sanctions
+geo-block, ToS/Privacy, lawyer consult) live in **`COMPLIANCE.md`**.
+*Still required:* a short lawyer consult for the launch jurisdiction(s) before going public.
 
 ### 1.2 Launch chain → **Base** (single chain for v1)
 One EVM L2 to start: Base (Coinbase's L2). Low fees, mature tooling, strong smart-wallet +

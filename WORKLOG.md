@@ -35,6 +35,42 @@
 
 ## Session log
 
+### 2026-06-14 — Product pivot: **non-custodial, no-KYC** wallet
+
+Decision: Lumen is a non-custodial, **no-KYC** wallet (the MetaMask/Rabby model). Reshaped the app to
+stay clearly in that lane (full reasoning in new **`COMPLIANCE.md`**).
+
+- **Buy → "Add funds" (non-custodial).** No more fake card/Apple-Pay processing. The page now shows the
+  receive address and **links out** to external on-ramps that do their *own* KYC — Lumen is never in the
+  payment flow. Sidebar label "Buy" → "Add funds"; dashboard quick action too.
+- **Earn → informational only.** Removed the in-app "stake" action (which implied Lumen offers yield —
+  securities-adjacent). Now shows reference APYs + "you stake on the protocol, keep custody" messaging.
+- **Positioning:** app-wide banner now reads "non-custodial · you hold your keys · no KYC". Copilot's
+  buy answer updated to the link-out, non-KYC phrasing.
+- **`COMPLIANCE.md`** records the posture, the design rules that keep us no-KYC, and the pre-launch
+  to-dos that aren't code (sanctions geo-block, ToS/Privacy, a lawyer consult). `DECISIONS.md` §1.1
+  updated.
+- Verified: core 45/45 green, `next build` green. (The earlier bundler package commit was still pending
+  and is included in this commit.)
+
+### 2026-06-14 — Self-hosted **bundler** package (unblocks smart-account sends)
+
+The smart account can *read* with just an RPC but needs an ERC-4337 **bundler** to *send*. Shipped a
+ready-to-run, self-hosted bundler setup — the one self-run service in the stack, no SaaS.
+
+- **`bundler/`** — Pimlico **Alto** (open-source) for Base Sepolia: `alto-config.example.json`
+  (EntryPoint v0.6, `chain-type: op-stack`, `safe-mode: false`, port 4337), `Dockerfile` (build from
+  source w/ Foundry) + `docker-compose.yml`, `gen-key.mjs` (mint a relay key via viem), `.env.example`,
+  and a step-by-step `README.md`.
+- **`web/.env.local.example`** — `NEXT_PUBLIC_BUNDLER_URL=http://localhost:4337`; once set, `/smart-account`
+  flips to **Bundler: Configured** and can relay real UserOperations.
+- **`.gitignore`** updated so the real `bundler/alto-config.json` (holds a relay key) and `.env.local`
+  are never committed; `*.example` files are.
+- Config was written against Alto's current docs (verified the flags via the Pimlico self-host guide)
+  but **not executed here** — it's infra the user runs (Docker + a funded testnet relay key). Flagged
+  honestly in the README.
+- Next on this track: a self-hosted **paymaster** (gasless), **social recovery** wiring, then **audit**.
+
 ### 2026-06-14 — Real **ERC-4337 smart account** (passkey-owned, no seed phrase)
 
 Started the real "no seed phrase" account — the hardened successor to the v0 EOA.

@@ -29,7 +29,7 @@ export function Shell({ children }: { children: ReactNode }) {
         </header>
         <main>{children}</main>
         {toast && <div className="toast">{toast}</div>}
-        <div className="demo-banner">Lumen is a UI demo · balances and addresses are mock · nothing touches a blockchain</div>
+        <div className="demo-banner">Lumen is non-custodial · you hold your keys · no KYC · demo data unless connected to a chain</div>
       </div>
     </div>
   );

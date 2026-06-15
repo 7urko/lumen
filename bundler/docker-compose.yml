@@ -1,0 +1,16 @@
+# Self-hosted ERC-4337 bundler for Base Sepolia (Alto). No SaaS.
+# 1) node ../bundler/gen-key.mjs  -> get a relay key + address
+# 2) fund the address from a Base Sepolia faucet
+# 3) cp alto-config.example.json alto-config.json  and paste the key in
+# 4) docker compose up --build
+# 5) set NEXT_PUBLIC_BUNDLER_URL=http://localhost:4337 in web/.env.local
+
+services:
+  bundler:
+    build: .
+    container_name: lumen-bundler
+    ports:
+      - "4337:4337"
+    volumes:
+      - ./alto-config.json:/config/alto-config.json:ro
+    restart: unless-stopped

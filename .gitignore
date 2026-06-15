@@ -8,9 +8,13 @@ core/dist/
 # logs / os
 *.log
 .DS_Store
-# env
+# env (ignore real env + secrets, keep *.example)
 .env*
 !.env.example
+!.env*.example
+# bundler real config holds a relay private key — never commit it
+bundler/alto-config.json
+bundler/.env
 
 # scratch / one-off helpers (not part of the project)
 _setup.bat

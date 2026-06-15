@@ -1,61 +1,52 @@
 "use client";
 
-import { useState } from "react";
-import { computeBuyQuote, fmtUsd, fmtAmt, type BuyMethod } from "@lumen/core";
+import Link from "next/link";
+import { shortAddr } from "@lumen/core";
 import { useWallet } from "@/components/WalletProvider";
+import { Icon } from "@/components/icons";
 
-const PRESETS = [50, 100, 250, 500];
+const ONRAMPS = [
+  { name: "Coinbase", url: "https://www.coinbase.com" },
+  { name: "Kraken", url: "https://www.kraken.com" },
+  { name: "MoonPay", url: "https://www.moonpay.com" },
+];
 
-export default function BuyScreen() {
-  const { tokens, buy, showToast } = useWallet();
-  const buyable = [...tokens.filter((t) => !t.stable), ...tokens.filter((t) => t.stable)];
-  const [sym, setSym] = useState(buyable[0]?.sym ?? "BTC");
-  const [fiat, setFiat] = useState("100");
-  const [method, setMethod] = useState<BuyMethod>("card");
-
-  const token = tokens.find((t) => t.sym === sym) ?? tokens[0]!;
-  const amount = parseFloat(fiat) || 0;
-  const q = computeBuyQuote(token, amount, method);
-
-  function onBuy() {
-    if (amount <= 0) { showToast("Enter an amount"); return; }
-    buy(token.sym, q.tokenAmt, amount);
-    showToast(`Bought ${fmtAmt(q.tokenAmt)} ${token.sym}`);
-  }
-
+export default function AddFundsScreen() {
+  const { address, username, showToast } = useWallet();
   return (
     <div className="view" style={{ maxWidth: 600 }}>
-      <div className="view-head"><h2>Buy</h2><p className="muted">Fund your wallet with card or Apple Pay.</p></div>
-      <div className="card glass">
-        <div className="field">
-          <label>Asset</label>
-          <select className="select" value={sym} onChange={(e) => setSym(e.target.value)}>
-            {buyable.map((t) => <option key={t.sym} value={t.sym}>{t.sym} — {t.name}</option>)}
-          </select>
-        </div>
-        <div className="field">
-          <label>Amount (USD)</label>
-          <input className="input" inputMode="decimal" value={fiat} onChange={(e) => setFiat(e.target.value)} placeholder="0.00" />
-          <div className="chip-row" style={{ marginTop: 10 }}>
-            {PRESETS.map((p) => (
-              <button key={p} className={`chip${amount === p ? " active" : ""}`} onClick={() => setFiat(String(p))}>${p}</button>
-            ))}
-          </div>
-        </div>
-        <div className="field">
-          <label>Pay with</label>
-          <div className="chip-row">
-            <button className={`chip${method === "card" ? " active" : ""}`} onClick={() => setMethod("card")}>Card · 1.2%</button>
-            <button className={`chip${method === "apple" ? " active" : ""}`} onClick={() => setMethod("apple")}>Apple Pay · 0.9%</button>
-          </div>
-        </div>
-        <div className="legs">
-          <div className="leg"><span className="muted">Rate</span><span className="v">1 {token.sym} = {fmtUsd(token.price)}</span></div>
-          <div className="leg"><span className="muted">{method === "apple" ? "Apple Pay" : "Card"} fee</span><span className="v">{fmtUsd(q.fee)}</span></div>
-          <div className="leg"><span className="muted">You receive</span><span className="v">≈ {fmtAmt(q.tokenAmt)} {token.sym}</span></div>
-        </div>
-        <button className="btn btn-primary btn-block" disabled={amount <= 0} onClick={onBuy}>Buy {token.sym}</button>
+      <div className="view-head">
+        <h2>Add funds <span className="chip active" style={{ marginLeft: 8, verticalAlign: "middle" }}>Non-custodial</span></h2>
+        <p className="muted">Lumen never holds your money or processes payments — you keep full control of your keys. Fund your wallet one of two ways.</p>
       </div>
+
+      <div className="card glass" style={{ marginBottom: 16 }}>
+        <div className="section-title" style={{ marginTop: 0 }}>1 · Receive crypto you already hold</div>
+        <p className="muted" style={{ marginBottom: 12 }}>Send any supported asset to your address from another wallet or exchange.</p>
+        <div className="addr-box" style={{ marginBottom: 12 }}>
+          <span style={{ flex: 1 }}>{username} · {shortAddr(address)}</span>
+          <button className="iconbtn" onClick={() => { navigator.clipboard?.writeText(address); showToast("Address copied"); }} aria-label="Copy"><Icon name="copy" size={18} /></button>
+        </div>
+        <Link href="/receive" className="btn btn-primary btn-block"><Icon name="receive" size={18} /> Show my QR &amp; address</Link>
+      </div>
+
+      <div className="card glass">
+        <div className="section-title" style={{ marginTop: 0 }}>2 · Buy with an external on-ramp</div>
+        <p className="muted" style={{ marginBottom: 12 }}>
+          Buy crypto on any exchange or on-ramp you trust, then send it to the address above. These are
+          independent services — <b>they handle their own identity checks, not Lumen</b>. Lumen stays out
+          of the payment flow entirely.
+        </p>
+        <div className="chip-row">
+          {ONRAMPS.map((o) => (
+            <a key={o.name} className="chip" href={o.url} target="_blank" rel="noopener noreferrer">{o.name} ↗</a>
+          ))}
+        </div>
+      </div>
+
+      <p className="muted" style={{ fontSize: 12, marginTop: 16, textAlign: "center" }}>
+        Non-custodial · no KYC on Lumen · you hold your keys. Buying with fiat happens entirely on the external provider.
+      </p>
     </div>
   );
 }

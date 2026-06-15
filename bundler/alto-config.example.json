@@ -1,0 +1,11 @@
+{
+  "_comment": "Alto (ERC-4337 bundler) config for Base Sepolia. Copy to alto-config.json and fill in a FUNDED relay key. EntryPoint v0.6 is the one the Coinbase Smart Wallet (Lumen's /smart-account) uses.",
+  "entrypoints": "0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789",
+  "rpc-url": "https://sepolia.base.org",
+  "executor-private-keys": "0xREPLACE_WITH_FUNDED_RELAY_PRIVATE_KEY",
+  "utility-private-key": "0xREPLACE_WITH_FUNDED_RELAY_PRIVATE_KEY",
+  "min-balance": "0",
+  "chain-type": "op-stack",
+  "safe-mode": false,
+  "port": 4337
+}

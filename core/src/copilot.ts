@@ -158,7 +158,7 @@ export function copilotReply(text: string, ctx: CopilotContext): CopilotReply {
   }
 
   // ----- buy / swap / alerts / recovery / fees -----
-  if (/\bbuy\b|on.?ramp|purchase|top up/.test(q)) return { html: "You can buy crypto with card or Apple Pay on the Buy screen — pick an amount and you'll see exactly how many tokens you'll receive.", action: { label: "Open Buy", route: "/buy" } };
+  if (/\bbuy\b|on.?ramp|purchase|top up/.test(q)) return { html: "Lumen is non-custodial and doesn't process payments. Buy on any exchange or on-ramp you trust (they do their own checks), then send it to your address.", action: { label: "Add funds", route: "/buy" } };
   if (/\bswap\b|exchange|convert|trade/.test(q)) return { html: "Use Swap to convert between tokens with a live rate and slippage control. I'll show price impact and run a safety check first.", action: { label: "Open Swap", route: "/swap" } };
   if (/alert|notify|remind/.test(q)) return { html: "Set price alerts to get notified when a coin crosses a target — for example BTC above $70,000.", action: { label: "Open Alerts", route: "/alerts" } };
   if (/recover|guardian|seed|phrase|backup|lost/.test(q)) return { html: "Your wallet is a smart account — no seed phrase. If you lose access, your trusted <b>guardians</b> can help you recover it.", action: { label: "Open Security", route: "/security" } };
