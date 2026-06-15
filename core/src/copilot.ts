@@ -164,6 +164,11 @@ export function copilotReply(text: string, ctx: CopilotContext): CopilotReply {
   if (/recover|guardian|seed|phrase|backup|lost/.test(q)) return { html: "Your wallet is a smart account — no seed phrase. If you lose access, your trusted <b>guardians</b> can help you recover it.", action: { label: "Open Security", route: "/security" } };
   if (/fee|gas|network cost/.test(q)) return { html: "Network fees are shown on every transaction review before you confirm — typically a fraction of the amount. Smart-account onboarding itself is gasless." };
 
+  if (/approval|allowance|revoke/.test(q)) return { html: "See and revoke the token spending allowances your wallet has granted on the <b>Approvals</b> screen — unlimited ones are flagged red.", action: { label: "Open Approvals", route: "/approvals" } };
+  if (/health|security|secure|how safe|checkup|wallet safe/.test(q)) return { html: "Your <b>Wallet Health</b> screen scores your security out of 100 — encryption, risky approvals, passkey, privacy — with one-click fixes.", action: { label: "Open Wallet Health", route: "/health" } };
+  if (/watch|track.*address|monitor.*wallet/.test(q)) return { html: "Use <b>Watch</b> to track any wallet\'s real holdings and get on-chain intel on it — read-only, no import.", action: { label: "Open Watch", route: "/watch" } };
+  if (/privacy|tracking|analytics|telemetr|spy/.test(q)) return { html: "Lumen makes no analytics or tracking calls. The <b>Privacy</b> screen lists exactly what leaves your device and has a Strict mode.", action: { label: "Open Privacy", route: "/privacy" } };
+
   // ----- help / greetings -----
   if (/help|what can you|how do you|capabilit|commands?/.test(q)) {
     return { html: "I can help with:<br>&bull; <b>Portfolio &amp; P&amp;L</b> — “what's my portfolio worth?”<br>&bull; <b>Scam checks</b> — “is this address safe?”<br>&bull; <b>Explaining activity</b> — “explain my last transaction”<br>&bull; <b>Sending</b> — “send $50 of ETH to alice”<br>&bull; <b>Prices, staking, alerts</b> and more. Just ask." };

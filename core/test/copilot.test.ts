@@ -37,3 +37,13 @@ test("help lists capabilities", () => {
   const r = copilotReply("what can you do?", ctx);
   assert.match(r.html, /Portfolio/i);
 });
+
+test("copilot routes to approvals", () => {
+  const r = copilotReply("how do I revoke approvals?", ctx);
+  assert.equal(r.action?.route, "/approvals");
+});
+
+test("copilot routes to wallet health", () => {
+  const r = copilotReply("is my wallet secure?", ctx);
+  assert.equal(r.action?.route, "/health");
+});

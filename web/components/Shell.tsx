@@ -8,6 +8,7 @@ import { Icon } from "./icons";
 import { useWallet } from "./WalletProvider";
 import { GasWidget } from "./GasWidget";
 import { CommandPalette } from "./CommandPalette";
+import { Tour } from "./Tour";
 import { applyAccent, getAccentName } from "@/lib/theme";
 
 export function Shell({ children }: { children: ReactNode }) {
@@ -39,6 +40,7 @@ export function Shell({ children }: { children: ReactNode }) {
         <div className="demo-banner">Lumen is non-custodial · you hold your keys · no KYC · demo data unless connected to a chain</div>
       </div>
       <CommandPalette />
+      <Tour />
     </div>
   );
 }

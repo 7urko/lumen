@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { fmtUsd, fmtAmt } from "@lumen/core";
-import { getPortfolio, isAddress, CHAIN_META, type ChainKey, type OnchainPortfolio } from "@/lib/chain";
+import { getPortfolio, getNetWorth, isAddress, CHAIN_META, type ChainKey, type OnchainPortfolio, type NetWorth } from "@/lib/chain";
 
 const SAMPLE = "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045"; // vitalik.eth
 
@@ -10,6 +10,7 @@ export default function LiveScreen() {
   const [chain, setChain] = useState<ChainKey>("base");
   const [addr, setAddr] = useState(SAMPLE);
   const [data, setData] = useState<OnchainPortfolio | null>(null);
+  const [netWorth, setNetWorth] = useState<NetWorth | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -19,6 +20,7 @@ export default function LiveScreen() {
     try {
       const p = await getPortfolio(key, address);
       setData(p);
+      getNetWorth(address).then(setNetWorth).catch(() => {});
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to read from the chain");
       setData(null);
@@ -42,6 +44,7 @@ export default function LiveScreen() {
             <label>Network</label>
             <select className="select" value={chain} onChange={(e) => setChain(e.target.value as ChainKey)}>
               <option value="base">Base mainnet</option>
+              <option value="ethereum">Ethereum mainnet</option>
               <option value="baseSepolia">Base Sepolia</option>
             </select>
           </div>
@@ -58,6 +61,14 @@ export default function LiveScreen() {
         <div className="card glass" style={{ marginBottom: 18 }}>
           <span className="skeleton" style={{ width: 120, height: 12 }} />
           <div style={{ marginTop: 10 }}><span className="skeleton" style={{ width: 220, height: 34 }} /></div>
+        </div>
+      )}
+
+      {netWorth && (
+        <div className="card glass" style={{ marginBottom: 18 }}>
+          <div className="hero-label">Net worth · Base + Ethereum</div>
+          <div className="balance" style={{ fontSize: 30 }}>{fmtUsd(netWorth.totalUsd)}</div>
+          <div className="muted" style={{ fontSize: 13 }}>{netWorth.parts.map((pt) => `${pt.label.replace(" mainnet","")}: ${fmtUsd(pt.usd)}`).join("  ·  ")}</div>
         </div>
       )}
 

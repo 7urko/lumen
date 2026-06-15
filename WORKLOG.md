@@ -43,6 +43,15 @@ toast slide-in, primary-button glow pulse, hero sheen) — all reduced-motion sa
 `AnimatedNumber` count-up on the dashboard balance; **sparkline now draws itself on** (stroke-dash
 animation); skeleton-shimmer loaders + a spinner util, used on the live/watch async screens.
 
+**Wave 4 — multi-chain + smarter Copilot:** the chain layer now also reads **Ethereum mainnet** (tokens
++ Chainlink price); `/live` shows a combined **Net worth across Base + Ethereum** card and an Ethereum
+option. Copilot gained intents that route to Approvals / Wallet Health / Watch / Privacy (core 47 tests
+green).
+
+**Wave 5 — onboarding tour + deploy:** a first-run **guided tour** (5 steps, localStorage-gated) mounted
+app-wide. New **`DEPLOY.md`** — step-by-step to put Lumen on a real free URL via Vercel (Root Directory =
+`web`, optional env RPCs), plus the pre-public-launch reminders.
+
 **Wave 3 — ENS, QR scan, 404:** the real `/account` send now resolves **ENS names** (`vitalik.eth` →
 address, via mainnet `getEnsAddress`), has a **QR scanner** for the recipient (native `BarcodeDetector`,
 no dependency), and the recipient input is a reusable `RecipientField` (input + scan + ENS + Scam
