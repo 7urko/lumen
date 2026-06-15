@@ -99,6 +99,11 @@ export async function unlock(password: string): Promise<boolean> {
   }
 }
 
+/** The viem account for the unlocked key (for signing swaps etc.), or null if locked. */
+export function unlockedSigner() {
+  return unlockedPk ? privateKeyToAccount(unlockedPk) : null;
+}
+
 export function removeVault(): void {
   if (typeof window !== "undefined") localStorage.removeItem(STORE);
   unlockedPk = null;

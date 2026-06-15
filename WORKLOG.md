@@ -35,6 +35,25 @@
 
 ## Session log
 
+### 2026-06-14 — Real **on-chain swap** (Uniswap v3 + WETH wrap) on Base Sepolia
+
+Added real token swapping signed by the encrypted vault. No third party — viem + the on-chain
+Uniswap v3 contracts directly.
+
+- **`web/lib/swap-onchain.ts`** — official Base Sepolia addresses (SwapRouter02
+  `0x94cC0AaC…12bc4`, QuoterV2 `0xC5290058…df5E27`, WETH `0x4200…0006`, USDC `0x036C…cF7e`):
+  - **ETH ⇄ WETH** = 1:1 wrap/unwrap via WETH9 (`deposit`/`withdraw`) — needs no liquidity, so it
+    ALWAYS works on testnet. The reliable real-swap path.
+  - **WETH ⇄ USDC** = real Uniswap v3 swap (QuoterV2 quote → approve → `exactInputSingle`). Real, but
+    depends on a funded pool existing on Base Sepolia; with no liquidity it reverts and the UI shows a
+    friendly "no pool / liquidity" message.
+- **`components/SwapCard.tsx`** added to the unlocked `/account` screen — from/to/amount, Get quote,
+  Swap, tx link, friendly errors. Signs with the unlocked vault key (`unlockedSigner` added to account.ts).
+- **Verified:** typecheck + `next build` green (25 routes). Honest note: I couldn't screenshot the
+  rendered card because the dev server on the machine had stopped (browser showed connection-refused) —
+  the code is build-verified and delivered; restart `Start Web App.bat` to see it. On-chain execution
+  is the user's step (needs faucet funds; ETH↔WETH will work, WETH↔USDC depends on testnet liquidity).
+
 ### 2026-06-14 — Hardened `/account`: **password-encrypted vault** + real send
 
 Reworked the EOA wallet from a plaintext-key v0 into a proper encrypted vault — the no-ops, "you and

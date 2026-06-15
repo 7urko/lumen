@@ -9,6 +9,7 @@ import {
 } from "@/lib/account";
 import { useWallet } from "@/components/WalletProvider";
 import { Icon } from "@/components/icons";
+import { SwapCard } from "@/components/SwapCard";
 
 const EXPLORER = "https://sepolia.basescan.org";
 
@@ -155,6 +156,8 @@ export default function AccountScreen() {
             {txHash && <div className="hint good" style={{ marginBottom: 10 }}>Broadcast ✓ <a href={`${EXPLORER}/tx/${txHash}`} target="_blank" rel="noopener noreferrer" style={{ color: "var(--accent-2)" }}>view tx →</a></div>}
             <button className="btn btn-primary btn-block" disabled={busy} onClick={onSend}>{busy ? "Signing &amp; broadcasting…" : "Sign &amp; send (real testnet tx)"}</button>
           </div>
+
+          <SwapCard />
 
           <div style={{ textAlign: "center", marginTop: 18 }}><button className="faint" onClick={onRemove}>Remove this wallet from the browser</button></div>
         </>
