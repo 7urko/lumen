@@ -29,6 +29,7 @@ const NAV: Array<{ group: string; items: Array<{ href: string; label: string; ic
     { href: "/account", label: "Account", icon: "lock" },
     { href: "/smart-account", label: "Smart account", icon: "key" },
     { href: "/approvals", label: "Approvals", icon: "ban" },
+    { href: "/health", label: "Wallet Health", icon: "heart" },
     { href: "/security", label: "Security", icon: "shield" },
     { href: "/privacy", label: "Privacy", icon: "eyeoff" },
   ]},

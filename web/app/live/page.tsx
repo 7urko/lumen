@@ -54,6 +54,13 @@ export default function LiveScreen() {
         {error && <div className="hint bad" style={{ marginTop: 10 }}>{error}</div>}
       </div>
 
+      {loading && !data && (
+        <div className="card glass" style={{ marginBottom: 18 }}>
+          <span className="skeleton" style={{ width: 120, height: 12 }} />
+          <div style={{ marginTop: 10 }}><span className="skeleton" style={{ width: 220, height: 34 }} /></div>
+        </div>
+      )}
+
       {data && (
         <>
           <div className="card glass" style={{ marginBottom: 18 }}>

@@ -6,6 +6,7 @@ import { useWallet } from "@/components/WalletProvider";
 import { Sparkline } from "@/components/Sparkline";
 import { Coin } from "@/components/Coin";
 import { Icon } from "@/components/icons";
+import { AnimatedNumber } from "@/components/AnimatedNumber";
 
 function seedFor(sym: string): number {
   let h = 0;
@@ -23,7 +24,7 @@ export default function Dashboard() {
     <div className="view">
       <section className="hero glass">
         <div className="hero-label">Total balance</div>
-        <h1 className="balance">{fmtUsd(total)}</h1>
+        <h1 className="balance"><AnimatedNumber value={total} format={fmtUsd} /></h1>
         <div className={`change ${pnl.day >= 0 ? "pos" : "neg"}`}>
           <Icon name={pnl.day >= 0 ? "markets" : "activity"} size={16} />
           {fmtSigned(pnl.day)} ({pnl.dayPct >= 0 ? "+" : ""}{pnl.dayPct.toFixed(2)}%) today

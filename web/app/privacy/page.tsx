@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { EXTERNAL_CALLS, isStrict, setStrict } from "@/lib/privacy";
 import { Icon } from "@/components/icons";
 import { useWallet } from "@/components/WalletProvider";
+import { ACCENTS, applyAccent, getAccentName } from "@/lib/theme";
 
 const PROMISES = [
   "No analytics, no trackers, no telemetry — Lumen never reports what you do.",
@@ -15,7 +16,9 @@ const PROMISES = [
 export default function PrivacyScreen() {
   const { showToast } = useWallet();
   const [strict, setStrictState] = useState(false);
-  useEffect(() => { setStrictState(isStrict()); }, []);
+  const [accent, setAccent] = useState("Iris");
+  useEffect(() => { setStrictState(isStrict()); setAccent(getAccentName()); }, []);
+  function pick(name: string) { applyAccent(name); setAccent(name); }
 
   function toggle() {
     const next = !strict;
@@ -50,12 +53,22 @@ export default function PrivacyScreen() {
         <p className="muted" style={{ fontSize: 12, marginTop: 12 }}>The Base RPC node is how any wallet reads the chain — point it at your own node (env var) to share nothing with a public provider.</p>
       </div>
 
-      <div className="card glass" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+      <div className="card glass" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
         <div>
           <div style={{ fontWeight: 700 }}>Strict privacy mode</div>
           <div className="muted" style={{ fontSize: 13 }}>Disables the cosmetic external calls (the TradingView chart). Only the RPC remains.</div>
         </div>
         <button className={`chip${strict ? " active" : ""}`} onClick={toggle}>{strict ? "On" : "Off"}</button>
+      </div>
+
+      <div className="card glass">
+        <div className="section-title" style={{ marginTop: 0 }}>Appearance</div>
+        <div className="muted" style={{ marginBottom: 12, fontSize: 13 }}>Pick an accent — applied instantly, saved locally.</div>
+        <div style={{ display: "flex", gap: 10 }}>
+          {ACCENTS.map((a) => (
+            <button key={a.name} className={`swatch${accent === a.name ? " active" : ""}`} title={a.name} onClick={() => pick(a.name)} style={{ backgroundImage: a.grad }} />
+          ))}
+        </div>
       </div>
     </div>
   );

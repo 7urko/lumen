@@ -89,7 +89,7 @@ export default function WatchScreen() {
         </div>
       )}
 
-      {loading && <div className="muted">Reading on-chain…</div>}
+      {loading && <div className="card glass" style={{ marginBottom: 16 }}><span className="skeleton" style={{ width: 160, height: 12 }} /><div style={{ marginTop: 10 }}><span className="skeleton" style={{ width: 200, height: 28 }} /></div></div>}
 
       {active && intel && (
         <div className={`verdict ${intel.isContract ? "caution" : "safe"}`} style={{ marginTop: 0, marginBottom: 16 }}>

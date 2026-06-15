@@ -35,6 +35,26 @@
 
 ## Session log
 
+### 2026-06-14 — Big upgrade pass: **motion polish + more differentiators**
+
+**Wave 1 — motion & UI polish:** a full animation system in `globals.css` (page/route enter
+transitions, staggered list-row entrance, hover-lift on cards/rows, button/chip press feedback,
+toast slide-in, primary-button glow pulse, hero sheen) — all reduced-motion safe. New
+`AnimatedNumber` count-up on the dashboard balance; **sparkline now draws itself on** (stroke-dash
+animation); skeleton-shimmer loaders + a spinner util, used on the live/watch async screens.
+
+**Wave 2 — more differentiators + niceties:**
+- **⌘K / Ctrl-K command palette** (`CommandPalette.tsx`) — jump to any screen or run quick actions
+  (lock, toggle strict privacy) from anywhere. Topbar gets a ⌘K button.
+- **Live gas tracker** (`GasWidget.tsx` + `lib/gas.ts`) — real Base gas price in the topbar, polled
+  every 20s from the RPC. Self-built.
+- **Wallet Health** (`/health`) — a self-built **security score (/100)** aggregating: wallet
+  encrypted, no unlimited approvals, passkey smart account, strict privacy — with one-click "Fix →"
+  links. No other wallet scores you like this.
+- **Accent theming** — pick an accent (Iris/Cyan/Emerald/Magenta) on the Privacy screen; applied
+  instantly via CSS vars and persisted (`lib/theme.ts`, applied in Shell on load).
+- Sidebar gains Wallet Health. Verified: typecheck + `next build` green (29 routes).
+
 ### 2026-06-14 — **Differentiator features** (safety-first, privacy-first identity)
 
 Product wedge vs MetaMask/Rabby/Phantom: competitors' safety features are usually a paid third party
