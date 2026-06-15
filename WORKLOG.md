@@ -35,6 +35,23 @@
 
 ## Session log
 
+### 2026-06-14 — Hardened `/account`: **password-encrypted vault** + real send
+
+Reworked the EOA wallet from a plaintext-key v0 into a proper encrypted vault — the no-ops, "you and
+me build it" real wallet (no bundler needed; an EOA only needs an RPC to transact).
+
+- **`web/lib/account.ts`** rewritten: key is generated in-browser and stored **AES-256-GCM encrypted**,
+  key derived from the user's password via **PBKDF2-SHA256 (310k iters)** — the MetaMask vault model.
+  Plaintext key exists only in memory while unlocked; wiped on lock. Wrong password fails (GCM auth).
+  `createVault` / `unlock` / `lock` / `getBalance` / `sendTestEth` (signs + broadcasts via viem).
+- **`/account` page** reworked into create-password → unlock → (address + QR + live Sepolia balance +
+  real send + lock) stages. WebCrypto + viem only — no third party, no infra.
+- **Verified live on this machine:** set a password → real wallet created (`0x711b2E…2BE49`), key stored
+  encrypted, QR rendered, real Sepolia balance read (0.00000 ETH, unfunded). Send wired (needs faucet
+  funds; not broadcast during verification). `next build` green (25 routes).
+- **Next:** real **swap** on this account (Uniswap on-chain) — fragile on testnet (liquidity), so it's
+  the immediate follow-up. Then optionally connect the main dashboard to this real account.
+
 ### 2026-06-14 — Product pivot: **non-custodial, no-KYC** wallet
 
 Decision: Lumen is a non-custodial, **no-KYC** wallet (the MetaMask/Rabby model). Reshaped the app to
