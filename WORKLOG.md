@@ -35,6 +35,26 @@
 
 ## Session log
 
+### 2026-06-14 — **Hardened key model** — passkey smart account is now the app's wallet
+
+The prerequisite for ever holding real funds: no extractable private key in a browser. Reworked the
+app so the **primary wallet is the passkey-owned ERC-4337 smart account** (signer = WebAuthn passkey,
+verified on-chain), with the password-EOA demoted to a clearly-labelled "advanced / dev, not for real
+money" fallback.
+
+- **`web/lib/wallet.ts`** — unified active-wallet layer: `activeKind()` ("smart" preferred, else "eoa"),
+  `activeAddress()`, `canSign()`, `sendNative()` (routes a smart-account send through the bundler-gated
+  UserOp, or the EOA path). Smart account → **no stored key**; the passkey signs each send.
+- **`WalletProvider`** now resolves the active wallet (smart-first) + exposes `kind`. The whole app
+  (dashboard, receive, etc.) treats the smart account as *the* wallet when one exists.
+- **Send** branches by kind: smart account with no bundler shows a clear "bundler required to send"
+  notice (receiving still works); EOA keeps the unlock gate.
+- **`/account`** reframed: a prominent "Recommended: passkey Smart Account · no key stored" banner; the
+  password wallet is explicitly labelled not-safe-for-real-money.
+- **Why this matters:** this is the architecture change that makes Lumen *auditable and safe for real
+  funds*. Still testnet + still needs the **security audit** before mainnet/public real money — but the
+  unsafe browser-key custody is no longer the default. Verified: `next build` green, all routes 200.
+
 ### 2026-06-14 — **De-mocked the app** — main UI now runs on the real connected wallet
 
 Removed all `DEMO_*` mock data from the app (it stays in `core` only for unit tests). The main app is

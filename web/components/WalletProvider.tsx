@@ -3,7 +3,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import type { Address } from "viem";
 import type { Token, Contact, Alert, Guardian, Directory } from "@lumen/core";
-import { getAddress as getVaultAddress, hasVault } from "@/lib/account";
+import { activeAddress, activeKind, type WalletKind } from "@/lib/wallet";
 import { getPortfolio, type ChainKey } from "@/lib/chain";
 
 const CHAIN: ChainKey = "baseSepolia";
@@ -11,6 +11,7 @@ const TV: Record<string, string> = { ETH: "BINANCE:ETHUSDT", WETH: "BINANCE:ETHU
 
 interface WalletState {
   connected: boolean;        // a real wallet exists in this browser
+  kind: WalletKind | null;   // "smart" (passkey, no stored key) or "eoa" (legacy)
   address: Address | null;   // the real connected address
   chain: ChainKey;
   tokens: Token[];           // REAL on-chain holdings (mapped to the shared shape)
@@ -42,6 +43,7 @@ export function useWallet(): WalletState {
 
 export function WalletProvider({ children }: { children: ReactNode }) {
   const [address, setAddress] = useState<Address | null>(null);
+  const [kind, setKind] = useState<WalletKind | null>(null);
   const [assets, setAssets] = useState<Token[]>([]);
   const [loading, setLoading] = useState(false);
   const [contacts, setContacts] = useState<Contact[]>([]);
@@ -52,7 +54,9 @@ export function WalletProvider({ children }: { children: ReactNode }) {
   const nextId = useRef(1);
 
   const refresh = useCallback(async () => {
-    const addr = getVaultAddress();
+    const k = activeKind();
+    setKind(k);
+    const addr = await activeAddress();
     setAddress(addr);
     if (!addr) { setAssets([]); return; }
     setLoading(true);
@@ -93,12 +97,11 @@ export function WalletProvider({ children }: { children: ReactNode }) {
   const totalUsd = useMemo(() => assets.reduce((s, t) => s + t.balance * t.price, 0), [assets]);
 
   const value = useMemo<WalletState>(() => ({
-    connected: !!address, address, chain: CHAIN, tokens: assets, totalUsd, loading, refresh, recheck,
+    connected: !!address, kind, address, chain: CHAIN, tokens: assets, totalUsd, loading, refresh, recheck,
     contacts, addContact, alerts, addAlert, toggleAlert, removeAlert, guardians, addGuardian, removeGuardian,
     directory, toast, showToast,
-  }), [address, assets, totalUsd, loading, refresh, recheck, contacts, addContact, alerts, addAlert, toggleAlert, removeAlert, guardians, addGuardian, removeGuardian, directory, toast, showToast]);
+  }), [address, kind, assets, totalUsd, loading, refresh, recheck, contacts, addContact, alerts, addAlert, toggleAlert, removeAlert, guardians, addGuardian, removeGuardian, directory, toast, showToast]);
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }
 
-export { hasVault };

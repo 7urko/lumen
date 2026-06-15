@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import QRCode from "qrcode";
 import { isAddress } from "@/lib/chain";
@@ -102,6 +103,17 @@ export default function AccountScreen() {
       <div className="view-head">
         <h2>Account <span className="chip active" style={{ marginLeft: 8, verticalAlign: "middle" }}>Base Sepolia · encrypted</span></h2>
         <p className="muted">A real, self-built wallet on testnet. Your key is generated in your browser and stored <b>encrypted</b> (AES-256, unlocked by your password) — never in the clear, never sent anywhere.</p>
+      </div>
+
+      <div className="verdict safe" style={{ marginTop: 0, marginBottom: 16 }}>
+        <div className="verdict-head">
+          <div className="verdict-badge"><Icon name="shield" size={20} /></div>
+          <div>
+            <div className="verdict-title">Recommended: passkey Smart Account</div>
+            <div className="verdict-sub">The secure way to hold funds — <b>no private key is stored anywhere</b>; your passkey is the on-chain signer. The password wallet below keeps an encrypted key in this browser: fine for quick testnet dev, <b>not safe for real money</b>.</div>
+          </div>
+        </div>
+        <Link href="/smart-account" className="btn btn-primary" style={{ marginTop: 12, display: "inline-flex" }}>Set up Smart Account →</Link>
       </div>
 
       <div className="verdict caution" style={{ marginTop: 0 }}>

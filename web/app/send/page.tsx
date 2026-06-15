@@ -6,13 +6,13 @@ import { useRouter, useSearchParams } from "next/navigation";
 import type { Address, Hex } from "viem";
 import { fmtAmt } from "@lumen/core";
 import { useWallet } from "@/components/WalletProvider";
-import { isUnlocked, sendTestEth } from "@/lib/account";
+import { canSign, bundlerReady, sendNative } from "@/lib/wallet";
 import { recordRecipient } from "@/lib/scam-onchain";
 import { RecipientField } from "@/components/RecipientField";
 import { ConnectGate } from "@/components/ConnectGate";
 
 function SendInner() {
-  const { connected, tokens, showToast, refresh } = useWallet();
+  const { connected, kind, tokens, showToast, refresh } = useWallet();
   const router = useRouter();
   const params = useSearchParams();
   const eth = tokens.find((t) => t.sym === "ETH");
@@ -22,8 +22,10 @@ function SendInner() {
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState("");
   const [txHash, setTxHash] = useState<Hex | null>(null);
-  const unlocked = isUnlocked();
+
   const amt = parseFloat(amount) || 0;
+  const smartNeedsBundler = kind === "smart" && !bundlerReady();
+  const locked = kind === "eoa" && !canSign();
 
   async function onSend() {
     setErr(""); setTxHash(null);
@@ -31,19 +33,27 @@ function SendInner() {
     if (amt <= 0) { setErr("Enter an amount"); return; }
     setBusy(true);
     try {
-      const h = await sendTestEth(resolvedTo, amount);
+      const h = await sendNative(resolvedTo, amount);
       recordRecipient(resolvedTo);
       setTxHash(h); showToast("Sent"); setAmount(""); setTo("");
-      setTimeout(() => refresh(), 4000);
+      setTimeout(() => refresh(), 5000);
     } catch (e) { setErr(e instanceof Error ? e.message : "Send failed (is the wallet funded?)"); }
     finally { setBusy(false); }
   }
 
   return (
     <div className="view" style={{ maxWidth: 600 }}>
-      <div className="view-head"><h2>Send</h2><p className="muted">A real testnet send of native ETH on Base Sepolia, checked by Scam Shield before it leaves.</p></div>
+      <div className="view-head">
+        <h2>Send</h2>
+        <p className="muted">{kind === "smart" ? "Sent from your passkey smart account — your passkey signs, no stored key." : "Sending native ETH on Base Sepolia."} Checked by Scam Shield first.</p>
+      </div>
       <ConnectGate connected={connected}>
-        {!unlocked ? (
+        {smartNeedsBundler ? (
+          <div className="verdict caution"><div className="verdict-head"><div className="verdict-badge">i</div><div>
+            <div className="verdict-title">Bundler required to send</div>
+            <div className="verdict-sub">Your smart account is the secure, no-stored-key wallet — but sending a UserOperation needs your self-hosted bundler running. Set <code>NEXT_PUBLIC_BUNDLER_URL</code> (see BUNDLER.md). Receiving works without it.</div>
+          </div></div></div>
+        ) : locked ? (
           <div className="card glass" style={{ textAlign: "center" }}>
             <p className="muted" style={{ marginBottom: 12 }}>Wallet locked. Unlock it to send.</p>
             <Link href="/account" className="btn btn-primary" style={{ display: "inline-flex" }}>Unlock wallet</Link>
