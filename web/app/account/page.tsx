@@ -10,7 +10,7 @@ import {
 import { useWallet } from "@/components/WalletProvider";
 import { Icon } from "@/components/icons";
 import { SwapCard } from "@/components/SwapCard";
-import { RecipientRadar } from "@/components/RecipientRadar";
+import { RecipientField } from "@/components/RecipientField";
 import { recordRecipient } from "@/lib/scam-onchain";
 
 const EXPLORER = "https://sepolia.basescan.org";
@@ -27,6 +27,7 @@ export default function AccountScreen() {
   const [err, setErr] = useState("");
   const [balance, setBalance] = useState<number | null>(null);
   const [to, setTo] = useState("");
+  const [resolvedTo, setResolvedTo] = useState<Address | null>(null);
   const [amt, setAmt] = useState("0.001");
   const [txHash, setTxHash] = useState<Hex | null>(null);
   const qrRef = useRef<HTMLCanvasElement>(null);
@@ -77,13 +78,13 @@ export default function AccountScreen() {
 
   async function onSend() {
     setErr(""); setTxHash(null);
-    if (!isAddress(to)) { setErr("Enter a valid 0x recipient"); return; }
+    if (!resolvedTo) { setErr("Enter a valid 0x address or .eth name"); return; }
     const n = parseFloat(amt);
     if (!n || n <= 0) { setErr("Enter an amount"); return; }
     setBusy(true);
     try {
-      const hash = await sendTestEth(to as Address, amt);
-      recordRecipient(to);
+      const hash = await sendTestEth(resolvedTo, amt);
+      recordRecipient(resolvedTo);
       setTxHash(hash); showToast("Transaction broadcast");
       if (address) setTimeout(() => void refresh(address), 4000);
     } catch (e) { setErr(e instanceof Error ? e.message : "Send failed (is the wallet funded?)"); }
@@ -153,7 +154,7 @@ export default function AccountScreen() {
 
           <div className="card glass" style={{ marginTop: 18 }}>
             <div className="section-title" style={{ marginTop: 0 }}>Send test ETH</div>
-            <div className="field"><label>Recipient</label><input className="input" placeholder="0x…" value={to} onChange={(e) => setTo(e.target.value)} spellCheck={false} /><RecipientRadar address={to} /></div>
+            <RecipientField value={to} onChange={setTo} onResolved={setResolvedTo} />
             <div className="field"><label>Amount (ETH)</label><input className="input" inputMode="decimal" value={amt} onChange={(e) => setAmt(e.target.value)} /></div>
             {err && <div className="hint bad" style={{ marginBottom: 10 }}>{err}</div>}
             {txHash && <div className="hint good" style={{ marginBottom: 10 }}>Broadcast ✓ <a href={`${EXPLORER}/tx/${txHash}`} target="_blank" rel="noopener noreferrer" style={{ color: "var(--accent-2)" }}>view tx →</a></div>}

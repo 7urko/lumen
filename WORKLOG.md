@@ -43,6 +43,11 @@ toast slide-in, primary-button glow pulse, hero sheen) — all reduced-motion sa
 `AnimatedNumber` count-up on the dashboard balance; **sparkline now draws itself on** (stroke-dash
 animation); skeleton-shimmer loaders + a spinner util, used on the live/watch async screens.
 
+**Wave 3 — ENS, QR scan, 404:** the real `/account` send now resolves **ENS names** (`vitalik.eth` →
+address, via mainnet `getEnsAddress`), has a **QR scanner** for the recipient (native `BarcodeDetector`,
+no dependency), and the recipient input is a reusable `RecipientField` (input + scan + ENS + Scam
+Shield radar). Added a themed **404** page.
+
 **Wave 2 — more differentiators + niceties:**
 - **⌘K / Ctrl-K command palette** (`CommandPalette.tsx`) — jump to any screen or run quick actions
   (lock, toggle strict privacy) from anywhere. Topbar gets a ⌘K button.
