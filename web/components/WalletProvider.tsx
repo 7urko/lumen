@@ -1,39 +1,39 @@
 "use client";
 
-import { createContext, useCallback, useContext, useMemo, useRef, useState, type ReactNode } from "react";
-import {
-  DEMO_TOKENS, DEMO_HISTORY, DEMO_DIRECTORY, DEMO_ALERTS, DEMO_GUARDIANS,
-  type Token, type HistoryEntry, type Directory, type Contact, type Alert, type Guardian,
-} from "@lumen/core";
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import type { Address } from "viem";
+import type { Token, Contact, Alert, Guardian, Directory } from "@lumen/core";
+import { getAddress as getVaultAddress, hasVault } from "@/lib/account";
+import { getPortfolio, type ChainKey } from "@/lib/chain";
 
-export const DEMO_ADDRESS = "0x7a3F9c20Bd14eE8b51aA0d7C6F2e1B9d84Ac0E12";
-export const DEMO_USERNAME = "you.lumen";
+const CHAIN: ChainKey = "baseSepolia";
+const TV: Record<string, string> = { ETH: "BINANCE:ETHUSDT", WETH: "BINANCE:ETHUSDT", cbETH: "COINBASE:CBETHUSD" };
 
 interface WalletState {
-  tokens: Token[];
-  history: HistoryEntry[];
-  directory: Directory;
+  connected: boolean;        // a real wallet exists in this browser
+  address: Address | null;   // the real connected address
+  chain: ChainKey;
+  tokens: Token[];           // REAL on-chain holdings (mapped to the shared shape)
+  totalUsd: number;
+  loading: boolean;
+  refresh: () => Promise<void>;
+  recheck: () => void;       // re-read whether a wallet now exists
+  // local, user-owned data — real, starts empty (no seeds)
   contacts: Contact[];
-  alerts: Alert[];
-  guardians: Guardian[];
-  address: string;
-  username: string;
-  toast: string | null;
-  showToast: (msg: string) => void;
-  send: (sym: string, amount: number, toLabel: string) => void;
-  buy: (sym: string, tokenAmt: number, fiat: number) => void;
-  swap: (fromSym: string, toSym: string, fromAmt: number, toAmt: number) => void;
-  stake: (sym: string, amount: number) => void;
   addContact: (c: Contact) => void;
+  alerts: Alert[];
   addAlert: (a: Omit<Alert, "id">) => void;
   toggleAlert: (id: number) => void;
   removeAlert: (id: number) => void;
+  guardians: Guardian[];
   addGuardian: (g: Omit<Guardian, "id">) => void;
   removeGuardian: (id: number) => void;
+  directory: Directory;
+  toast: string | null;
+  showToast: (msg: string) => void;
 }
 
 const Ctx = createContext<WalletState | null>(null);
-
 export function useWallet(): WalletState {
   const c = useContext(Ctx);
   if (!c) throw new Error("useWallet must be used within <WalletProvider>");
@@ -41,51 +41,46 @@ export function useWallet(): WalletState {
 }
 
 export function WalletProvider({ children }: { children: ReactNode }) {
-  const [tokens, setTokens] = useState<Token[]>(() => DEMO_TOKENS.map((t) => ({ ...t })));
-  const [history, setHistory] = useState<HistoryEntry[]>(() => DEMO_HISTORY.map((h) => ({ ...h })));
-  const [contacts, setContacts] = useState<Contact[]>(() => DEMO_DIRECTORY.contacts.map((c) => ({ ...c })));
-  const [alerts, setAlerts] = useState<Alert[]>(() => DEMO_ALERTS.map((a) => ({ ...a })));
-  const [guardians, setGuardians] = useState<Guardian[]>(() => DEMO_GUARDIANS.map((g) => ({ ...g })));
+  const [address, setAddress] = useState<Address | null>(null);
+  const [assets, setAssets] = useState<Token[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [contacts, setContacts] = useState<Contact[]>([]);
+  const [alerts, setAlerts] = useState<Alert[]>([]);
+  const [guardians, setGuardians] = useState<Guardian[]>([]);
   const [toast, setToast] = useState<string | null>(null);
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const nextId = useRef(1000);
+  const nextId = useRef(1);
+
+  const refresh = useCallback(async () => {
+    const addr = getVaultAddress();
+    setAddress(addr);
+    if (!addr) { setAssets([]); return; }
+    setLoading(true);
+    try {
+      const p = await getPortfolio(CHAIN, addr);
+      const tokens: Token[] = p.assets.map((a) => {
+        const price = a.balance > 0 ? a.usd / a.balance : (a.sym === "USDC" || a.sym === "DAI" ? 1 : 0);
+        return { sym: a.sym, name: a.name, grad: a.grad, balance: a.balance, price, cost: price, change: 0, staked: 0, apy: 0, tv: TV[a.sym] ?? "BINANCE:ETHUSDT", stable: a.sym === "USDC" || a.sym === "DAI" };
+      });
+      setAssets(tokens);
+    } catch { /* keep last known */ }
+    finally { setLoading(false); }
+  }, []);
+
+  const recheck = useCallback(() => { void refresh(); }, [refresh]);
+
+  useEffect(() => {
+    void refresh();
+    const onFocus = () => void refresh();
+    window.addEventListener("focus", onFocus);
+    return () => window.removeEventListener("focus", onFocus);
+  }, [refresh]);
 
   const showToast = useCallback((msg: string) => {
     setToast(msg);
     if (toastTimer.current) clearTimeout(toastTimer.current);
     toastTimer.current = setTimeout(() => setToast(null), 2400);
   }, []);
-
-  const adjust = useCallback((sym: string, deltaBalance: number, deltaStaked = 0) => {
-    setTokens((ts) => ts.map((t) => (t.sym === sym ? { ...t, balance: Math.max(0, t.balance + deltaBalance), staked: Math.max(0, t.staked + deltaStaked) } : t)));
-  }, []);
-
-  const send = useCallback((sym: string, amount: number, toLabel: string) => {
-    adjust(sym, -amount);
-    setHistory((h) => [{ dir: "out", sym, amount, address: toLabel, ts: Date.now() }, ...h]);
-  }, [adjust]);
-
-  const buy = useCallback((sym: string, tokenAmt: number, fiat: number) => {
-    adjust(sym, tokenAmt);
-    setHistory((h) => [{ dir: "in", sym, amount: tokenAmt, address: "Card purchase", ts: Date.now() }, ...h]);
-    void fiat;
-  }, [adjust]);
-
-  const swap = useCallback((fromSym: string, toSym: string, fromAmt: number, toAmt: number) => {
-    setTokens((ts) => ts.map((t) => {
-      if (t.sym === fromSym) return { ...t, balance: Math.max(0, t.balance - fromAmt) };
-      if (t.sym === toSym) return { ...t, balance: t.balance + toAmt };
-      return t;
-    }));
-    setHistory((h) => [
-      { dir: "out", sym: fromSym, amount: fromAmt, address: `Swap → ${toSym}`, ts: Date.now() },
-      ...h,
-    ]);
-  }, []);
-
-  const stake = useCallback((sym: string, amount: number) => {
-    adjust(sym, -amount, amount);
-  }, [adjust]);
 
   const addContact = useCallback((c: Contact) => setContacts((cs) => [...cs, c]), []);
   const addAlert = useCallback((a: Omit<Alert, "id">) => setAlerts((as) => [{ ...a, id: nextId.current++ }, ...as]), []);
@@ -94,11 +89,16 @@ export function WalletProvider({ children }: { children: ReactNode }) {
   const addGuardian = useCallback((g: Omit<Guardian, "id">) => setGuardians((gs) => [...gs, { ...g, id: nextId.current++ }]), []);
   const removeGuardian = useCallback((id: number) => setGuardians((gs) => gs.filter((g) => g.id !== id)), []);
 
+  const directory = useMemo<Directory>(() => ({ contacts, registry: {}, blocklist: {} }), [contacts]);
+  const totalUsd = useMemo(() => assets.reduce((s, t) => s + t.balance * t.price, 0), [assets]);
+
   const value = useMemo<WalletState>(() => ({
-    tokens, history, directory: { ...DEMO_DIRECTORY, contacts }, contacts, alerts, guardians,
-    address: DEMO_ADDRESS, username: DEMO_USERNAME, toast,
-    showToast, send, buy, swap, stake, addContact, addAlert, toggleAlert, removeAlert, addGuardian, removeGuardian,
-  }), [tokens, history, contacts, alerts, guardians, toast, showToast, send, buy, swap, stake, addContact, addAlert, toggleAlert, removeAlert, addGuardian, removeGuardian]);
+    connected: !!address, address, chain: CHAIN, tokens: assets, totalUsd, loading, refresh, recheck,
+    contacts, addContact, alerts, addAlert, toggleAlert, removeAlert, guardians, addGuardian, removeGuardian,
+    directory, toast, showToast,
+  }), [address, assets, totalUsd, loading, refresh, recheck, contacts, addContact, alerts, addAlert, toggleAlert, removeAlert, guardians, addGuardian, removeGuardian, directory, toast, showToast]);
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }
+
+export { hasVault };

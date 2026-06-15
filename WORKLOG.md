@@ -35,6 +35,27 @@
 
 ## Session log
 
+### 2026-06-14 — **De-mocked the app** — main UI now runs on the real connected wallet
+
+Removed all `DEMO_*` mock data from the app (it stays in `core` only for unit tests). The main app is
+now a real wallet on **Base Sepolia testnet** (real = testnet until the smart-account path is audited;
+mainnet funds must wait per `COMPLIANCE.md`).
+
+- **`WalletProvider` rewritten** to be the real connected wallet: reads the encrypted vault address +
+  **live on-chain holdings** (`getPortfolio`, Base Sepolia), refresh on load/focus. Contacts / alerts /
+  guardians now start **empty** (real user data, no seeds).
+- **Screens rewired to real:** Home (real balance + assets, no fake P&L/sparklines), Send (real native
+  ETH send via the vault + Scam Shield radar + ENS + QR, unlock-gated), Receive (real address + QR),
+  Swap (real on-chain via SwapCard), Insights (real allocation; cost-basis P&L dropped — needs an
+  indexer), Activity (honest: links to the address on Basescan for complete history), Markets
+  (wallet-independent price view). A **ConnectGate** prompts to create/unlock a wallet where needed.
+- Topbar shows the real connected address; the banner now reads "live on Base Sepolia testnet" (no more
+  "demo data"). Contacts "Send" links by **address** (the real send resolves addresses/ENS, not `.lumen`).
+- **Honest limits (by design, no third-party services):** real value is **testnet**; full tx history &
+  cost-basis P&L need an indexer we don't ship → Activity points to the explorer, Insights shows
+  allocation only.
+- Verified: `next build` green; all routes serve 200. **No `DEMO_*` left anywhere in `web/`.**
+
 ### 2026-06-14 — Big upgrade pass: **motion polish + more differentiators**
 
 **Wave 1 — motion & UI polish:** a full animation system in `globals.css` (page/route enter

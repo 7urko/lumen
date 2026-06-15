@@ -8,7 +8,7 @@ import { useWallet } from "@/components/WalletProvider";
 interface Msg { role: "user" | "bot"; html: string; action?: CopilotAction }
 
 export default function CopilotScreen() {
-  const { tokens, history, directory } = useWallet();
+  const { tokens, directory } = useWallet();
   const router = useRouter();
   const [msgs, setMsgs] = useState<Msg[]>([
     { role: "bot", html: "Hi, I'm your Lumen Copilot. I can check your portfolio, screen addresses for scams, explain transactions, or set up a send for you. Try a suggestion below." },
@@ -20,7 +20,7 @@ export default function CopilotScreen() {
 
   function ask(q: string) {
     if (!q.trim()) return;
-    const reply = copilotReply(q, { tokens, history, directory });
+    const reply = copilotReply(q, { tokens, history: [], directory });
     setMsgs((m) => [...m, { role: "user", html: escapeHtml(q) }, { role: "bot", html: reply.html, action: reply.action }]);
     setText("");
   }

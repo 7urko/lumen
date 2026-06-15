@@ -13,7 +13,7 @@ import { RejectionGuard } from "./RejectionGuard";
 import { applyAccent, getAccentName } from "@/lib/theme";
 
 export function Shell({ children }: { children: ReactNode }) {
-  const { username, toast, showToast } = useWallet();
+  const { address, toast, showToast } = useWallet();
   const router = useRouter();
   useEffect(() => { applyAccent(getAccentName()); }, []);
 
@@ -25,7 +25,7 @@ export function Shell({ children }: { children: ReactNode }) {
         <header className="topbar">
           <div>
             <div className="wallet-name">Main Wallet</div>
-            <div className="wallet-user">{username}</div>
+            <div className="wallet-user">{address ? `${address.slice(0, 6)}…${address.slice(-4)}` : "Not connected"}</div>
           </div>
           <div className="topbar-actions" style={{ alignItems: "center" }}>
             <GasWidget />
@@ -39,7 +39,7 @@ export function Shell({ children }: { children: ReactNode }) {
         </header>
         <main>{children}</main>
         {toast && <div className="toast">{toast}</div>}
-        <div className="demo-banner">Lumen is non-custodial · you hold your keys · no KYC · demo data unless connected to a chain</div>
+        <div className="demo-banner">Lumen is non-custodial · you hold your keys · no KYC · live on Base Sepolia testnet</div>
       </div>
       <CommandPalette />
       <Tour />

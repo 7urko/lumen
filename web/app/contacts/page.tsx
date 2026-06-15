@@ -47,7 +47,7 @@ export default function ContactsScreen() {
               <div className="tx-title">{c.name}</div>
               <div className="tx-sub">{c.username} · {shortAddr(c.address)}{flagged ? " · ⚠ Flagged by Scam Shield" : ""}</div>
             </div>
-            <Link className="btn" href={`/send?to=${encodeURIComponent(c.username)}`}><Icon name="send" size={16} /> Send</Link>
+            <Link className="btn" href={`/send?to=${c.address}`}><Icon name="send" size={16} /> Send</Link>
           </div>
         );
       })}

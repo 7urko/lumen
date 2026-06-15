@@ -1,14 +1,20 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useWallet } from "@/components/WalletProvider";
 import { isStrict } from "@/lib/privacy";
 
+const MARKETS: Array<{ sym: string; tv: string }> = [
+  { sym: "BTC", tv: "BINANCE:BTCUSDT" },
+  { sym: "ETH", tv: "BINANCE:ETHUSDT" },
+  { sym: "SOL", tv: "BINANCE:SOLUSDT" },
+  { sym: "BASE", tv: "BINANCE:ETHUSDT" },
+  { sym: "MATIC", tv: "BINANCE:MATICUSDT" },
+];
+
 export default function MarketsScreen() {
-  const { tokens } = useWallet();
-  const [sym, setSym] = useState(tokens[0]?.sym ?? "BTC");
+  const [sym, setSym] = useState("ETH");
   const [strict, setStrict] = useState(false);
-  const token = tokens.find((t) => t.sym === sym) ?? tokens[0]!;
+  const market = MARKETS.find((m) => m.sym === sym) ?? MARKETS[1]!;
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => { setStrict(isStrict()); }, []);
@@ -25,23 +31,20 @@ export default function MarketsScreen() {
     script.src = "https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js";
     script.async = true;
     script.innerHTML = JSON.stringify({
-      symbol: token.tv, theme: "dark", style: "1", locale: "en", autosize: true,
+      symbol: market.tv, theme: "dark", style: "1", locale: "en", autosize: true,
       hide_top_toolbar: false, hide_legend: false,
       backgroundColor: "rgba(6,6,12,1)", gridColor: "rgba(255,255,255,0.06)", allow_symbol_change: false,
     });
     el.appendChild(script);
     return () => { el.innerHTML = ""; };
-  }, [token.tv, strict]);
+  }, [market.tv, strict]);
 
   return (
     <div className="view">
-      <div className="view-head">
-        <h2>Markets</h2>
-        <p className="muted">Live prices, powered by TradingView.</p>
-      </div>
+      <div className="view-head"><h2>Markets</h2><p className="muted">Live prices, powered by TradingView.</p></div>
       <div className="chip-row">
-        {tokens.map((t) => (
-          <button key={t.sym} className={`chip${t.sym === sym ? " active" : ""}`} onClick={() => setSym(t.sym)}>{t.sym}</button>
+        {MARKETS.map((m) => (
+          <button key={m.sym} className={`chip${m.sym === sym ? " active" : ""}`} onClick={() => setSym(m.sym)}>{m.sym}</button>
         ))}
       </div>
       {strict ? (
@@ -49,9 +52,7 @@ export default function MarketsScreen() {
           <p className="muted">Chart hidden in <b>Strict privacy mode</b> (it would load from TradingView). Turn it off on the Privacy screen to show it.</p>
         </div>
       ) : (
-        <div className="chart-frame">
-          <div className="tradingview-widget-container" ref={containerRef} style={{ height: "100%", width: "100%" }} />
-        </div>
+        <div className="chart-frame"><div className="tradingview-widget-container" ref={containerRef} style={{ height: "100%", width: "100%" }} /></div>
       )}
     </div>
   );

@@ -1,27 +1,22 @@
 "use client";
 
-import { fmtAmt, relTime } from "@lumen/core";
 import { useWallet } from "@/components/WalletProvider";
-import { Icon } from "@/components/icons";
+import { ConnectGate } from "@/components/ConnectGate";
 
 export default function ActivityScreen() {
-  const { history } = useWallet();
+  const { address, connected } = useWallet();
   return (
     <div className="view" style={{ maxWidth: 720 }}>
-      <div className="view-head">
-        <h2>Activity</h2>
-        <p className="muted">Your recent transactions.</p>
-      </div>
-      {history.map((h, i) => (
-        <div className="tx" key={i}>
-          <div className={`tx-ic ${h.dir}`}><Icon name={h.dir === "in" ? "receive" : "send"} size={18} /></div>
-          <div className="tx-main">
-            <div className="tx-title">{h.dir === "in" ? "Received" : "Sent"} {h.sym}</div>
-            <div className="tx-sub">{h.dir === "in" ? "from" : "to"} {h.address} · {relTime(h.ts)}</div>
-          </div>
-          <div className={`tx-amt ${h.dir === "in" ? "pos" : "neg"}`}>{h.dir === "in" ? "+" : "−"}{fmtAmt(h.amount)} {h.sym}</div>
+      <div className="view-head"><h2>Activity</h2><p className="muted">Your real on-chain history.</p></div>
+      <ConnectGate connected={connected}>
+        <div className="card glass" style={{ textAlign: "center" }}>
+          <p className="muted" style={{ marginBottom: 14 }}>
+            Full, complete transaction history needs a block explorer or indexer — and Lumen deliberately ships
+            no third-party indexer. View your real, complete history for this address on Basescan.
+          </p>
+          <a className="btn btn-primary" style={{ display: "inline-flex" }} href={`https://sepolia.basescan.org/address/${address}`} target="_blank" rel="noopener noreferrer">Open on Basescan ↗</a>
         </div>
-      ))}
+      </ConnectGate>
     </div>
   );
 }
