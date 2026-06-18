@@ -2,6 +2,7 @@
 
 import { useWallet } from "@/components/WalletProvider";
 import { ConnectGate } from "@/components/ConnectGate";
+import { ACTIVE_EXPLORER } from "@/lib/config";
 
 export default function ActivityScreen() {
   const { address, connected } = useWallet();
@@ -14,7 +15,7 @@ export default function ActivityScreen() {
             Full, complete transaction history needs a block explorer or indexer — and Lumen deliberately ships
             no third-party indexer. View your real, complete history for this address on Basescan.
           </p>
-          <a className="btn btn-primary" style={{ display: "inline-flex" }} href={`https://sepolia.basescan.org/address/${address}`} target="_blank" rel="noopener noreferrer">Open on Basescan ↗</a>
+          <a className="btn btn-primary" style={{ display: "inline-flex" }} href={`${ACTIVE_EXPLORER}/address/${address}`} target="_blank" rel="noopener noreferrer">Open on Basescan ↗</a>
         </div>
       </ConnectGate>
     </div>

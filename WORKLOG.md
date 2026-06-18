@@ -10,6 +10,116 @@
 
 ---
 
+## 2026-06-18 — Launch-prep: bundler mainnet, legal pages, geo-block, checklist
+
+User has audit + legal clearance and said go. Built everything buildable without machine
+access; the rest is gated on a green build + infra the user runs.
+
+- **Bundler → mainnet:** `bundler/alto-config.mainnet.example.json` (Base mainnet RPC,
+  same EntryPoint v0.6, `safe-mode: true`, `min-balance` 0.1 ETH); `bundler/README.md` gets a
+  "Going to mainnet" section (real-ETH relay key, HTTPS, paymaster note).
+- **Legal:** new `/legal/terms` + `/legal/privacy` pages (standard non-custodial templates with
+  clear "counsel must finalise" banners + bracketed placeholders); footer links in `Sidebar`;
+  fixed the stale "Demo · mock data" footer to "Non-custodial · you hold your keys · no KYC".
+- **Sanctions geo-block:** `middleware.ts` returns 451 for comprehensively-sanctioned countries
+  (CU/IR/KP/SY baseline via `x-vercel-ip-country`/`cf-ipcountry`), `GEOBLOCK=off` to disable,
+  list to be confirmed with counsel.
+- **Env template:** `web/.env.example` documents every var incl. `NEXT_PUBLIC_CHAIN`, RPCs,
+  `NEXT_PUBLIC_BUNDLER_URL`, `GEOBLOCK`.
+- **`LAUNCH-CHECKLIST.md`** — single source of truth, owner-tagged (C vs You), ordered.
+- Added **`_build.bat`** so the user can finally produce a `next build` result (`_build.log`)
+  for me to verify — still the #1 blocker; nothing flips to mainnet until it's green.
+
+Remaining is build-verify (user runs `_build.bat`), lawyer-finalise the legal text, run+fund the
+mainnet bundler, deploy, then flip `NEXT_PUBLIC_CHAIN=base`, then the user's first real send.
+
+---
+
+## 2026-06-15 (mainnet-ready) — One-switch Base mainnet capability
+
+Auditor + lawyer cleared it (non-custodial). User chose to flip to mainnet. Built it the
+safe, reversible way: a **single switch** `web/lib/config.ts` exposing `ACTIVE_CHAIN`,
+`ACTIVE_VIEM_CHAIN`, `ACTIVE_RPC`, `ACTIVE_EXPLORER`, `ACTIVE_LABEL`, and per-chain
+`SWAP_ADDRS`. **Defaults to Base Sepolia**; going live is one env var: `NEXT_PUBLIC_CHAIN=base`.
+
+- **Verified mainnet addresses** against canonical sources before wiring them (see
+  `ADDRESSES.md`, now mostly ✅): Uniswap **SwapRouter02 `0x2626664c…1741e481`** + **QuoterV2
+  `0x3d4e44Eb…335B76a`** (official Uniswap Base deployments doc — which also *confirmed* our
+  testnet router/quoter), **Chainlink ETH/USD `0x7104…Bb70`** (data.chain.link), WETH predeploy.
+- **Rewired every active-wallet path** off hardcoded `baseSepolia` to the switch:
+  `account.ts`, `smart-account.ts`, `swap-onchain.ts`, `approvals.ts`, `scam-onchain.ts`,
+  `WalletProvider`, and all explorer links + network labels across the screens.
+- **Mainnet safety:** the password-encrypted **browser EOA is disabled on mainnet** (pushes
+  users to the passkey smart account); swap uses the 0.05% (deep) WETH/USDC pool on Base.
+- Flip procedure + preconditions documented in `DEPLOY.md` ("the one-variable flip").
+
+**Still gated (the flip is the LAST step):** green `next build` + testnet smoke test, the
+bundler/paymaster running, audit sign-off + ToS/Privacy live, ⚠️ addresses re-confirmed.
+**Same build caveat:** couldn't run `next build` in the Linux sandbox (no SWC binary; mount
+served stale truncated copies → false tsc errors). All Windows source is complete + reviewed.
+**Run `npm run build -w web` + `npm run dev` on the machine before flipping.** I don't move
+funds — the first real send is the user's.
+
+---
+
+## 2026-06-15 (later) — Fixed every open security finding
+
+Worked through all remaining findings from `SECURITY-REVIEW.md` at full strength.
+See that file's status table (all Medium/Low now Fixed/Improved). Highlights:
+
+- **M5 (biggest):** moved CSP to **nonce-based middleware** (`web/middleware.ts`) —
+  `script-src` is now `'self' 'nonce' 'strict-dynamic'`, **no `unsafe-inline`**. The
+  TradingView chart was moved into a **sandboxed, opaque-origin iframe** (`app/markets/page.tsx`)
+  so it can't touch the wallet origin/storage; that's what let us drop unsafe-inline.
+  `next.config.ts` now carries only the static headers (no conflicting CSP).
+- **M1/M2:** `account.ts` enforces password strength (12+ chars, mixed classes, no
+  common pw) with a UI strength meter, and **auto-locks** the in-memory key on 10-min
+  inactivity and on tab-hide.
+- **M3:** `RecipientField` rejects bad-checksum addresses, shows the **full** resolved
+  address, and warns when an all-lowercase address has no checksum to verify.
+- **M4:** every hardcoded address is validated at load (`vAddr`/`getAddress`) and
+  documented in new **`ADDRESSES.md`** with sources + a before-mainnet checklist.
+- **M6:** deleted the dead `passkey.ts` no-op verifier.
+- **Low:** Chainlink staleness guard, slippage clamp (0.05–50%), smart-account
+  credential shape-validation, chunked approval-log scan (public-RPC friendly).
+
+**Verify caveat (same as before):** couldn't run `next build` in the Linux sandbox
+(no SWC binary download; mount served stale/truncated copies → false tsc errors). All
+Windows source files are complete + reviewed. **Run `npm run build -w web` + a quick
+`npm run dev` smoke test** (watch the console for CSP violations; confirm the Markets
+chart still renders) before deploying. Still testnet; external audit still required
+for mainnet. Commit after this entry.
+
+---
+
+## 2026-06-15 — Pre-audit security review + CSP hardening
+
+Did an internal line-by-line security review of the value-handling surface
+(keys/signing, send/swap/approvals, network/trust, recipient handling, front-end).
+Full findings in **`SECURITY-REVIEW.md`** (severity-ranked).
+
+- **Fixed (High):** there were **no security headers/CSP at all**. Added a strict
+  Content-Security-Policy + HSTS, `X-Frame-Options: DENY`, `nosniff`,
+  `Referrer-Policy`, `Permissions-Policy` (camera-only for QR), DNS-prefetch off, in
+  `web/next.config.ts` via `headers()`. CSP locks `connect-src` to our RPC/bundler
+  origins only (custom `NEXT_PUBLIC_*` URLs auto-added), `script-src` to self +
+  TradingView, `frame-ancestors 'none'`. Dev relaxes (eval/ws for HMR); prod doesn't.
+  This directly defends the address-swap drainer + vault-exfiltration vectors.
+- **Open findings** (recommended, not yet done): password-strength enforcement (M1),
+  idle auto-lock (M2), checksum-strict address confirm (M3), verify hardcoded
+  addresses before mainnet (M4), sandbox/SRI the TradingView script + nonce CSP (M5),
+  remove the dead `verifyPasskey()` no-op (M6), plus low-sev items.
+- **Reaffirmed good:** smart account = audited Coinbase contract, no extractable key;
+  swaps approve exact amount; AES-256-GCM/PBKDF2-310k vault; strict TS.
+- **Verify caveat:** `next build` couldn't run in the Linux sandbox (no registry for
+  the Linux SWC binary; mount also served a stale truncated copy). The real
+  `next.config.ts` is valid and uses the standard Next headers API — **run
+  `npm run build -w web` on the Windows machine to confirm green before deploy.**
+- Still **testnet only**. This pass shrinks the eventual external-audit surface; it
+  does not replace the audit. Commit after this entry.
+
+---
+
 ## Project snapshot (as of 2026-06-14)
 
 **What it is:** "Lumen" — a polished crypto-wallet **front-end demo**. Plain HTML/CSS/vanilla JS, no build step, no backend. All data is mock + in-memory and resets on reload. No real keys, no blockchain, no network calls (except two CDN libs: QR code + TradingView chart).

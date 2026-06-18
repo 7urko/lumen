@@ -7,6 +7,7 @@
  */
 import type { Address } from "viem";
 import { client } from "./chain";
+import { ACTIVE_CHAIN } from "./config";
 
 const SEEN_KEY = "lumen.seen-recipients";
 
@@ -32,7 +33,7 @@ export function recordRecipient(addr: string): void {
 
 /** Inspect a recipient before you send to it. */
 export async function inspectRecipient(address: Address): Promise<Radar> {
-  const pub = client("baseSepolia");
+  const pub = client(ACTIVE_CHAIN);
   const [code, nonce] = await Promise.all([
     pub.getCode({ address }),
     pub.getTransactionCount({ address }),

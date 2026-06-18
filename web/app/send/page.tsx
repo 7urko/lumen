@@ -8,6 +8,7 @@ import { fmtAmt } from "@lumen/core";
 import { useWallet } from "@/components/WalletProvider";
 import { canSign, bundlerReady, sendNative } from "@/lib/wallet";
 import { recordRecipient } from "@/lib/scam-onchain";
+import { ACTIVE_EXPLORER, ACTIVE_LABEL } from "@/lib/config";
 import { RecipientField } from "@/components/RecipientField";
 import { ConnectGate } from "@/components/ConnectGate";
 
@@ -45,7 +46,7 @@ function SendInner() {
     <div className="view" style={{ maxWidth: 600 }}>
       <div className="view-head">
         <h2>Send</h2>
-        <p className="muted">{kind === "smart" ? "Sent from your passkey smart account — your passkey signs, no stored key." : "Sending native ETH on Base Sepolia."} Checked by Scam Shield first.</p>
+        <p className="muted">{kind === "smart" ? "Sent from your passkey smart account — your passkey signs, no stored key." : `Sending native ETH on ${ACTIVE_LABEL}.`} Checked by Scam Shield first.</p>
       </div>
       <ConnectGate connected={connected}>
         {smartNeedsBundler ? (
@@ -70,7 +71,7 @@ function SendInner() {
             </div>
             <RecipientField value={to} onChange={setTo} onResolved={setResolvedTo} />
             {err && <div className="hint bad" style={{ marginBottom: 10 }}>{err}</div>}
-            {txHash && <div className="hint good" style={{ marginBottom: 10 }}>Broadcast ✓ <a href={`https://sepolia.basescan.org/tx/${txHash}`} target="_blank" rel="noopener noreferrer" style={{ color: "var(--accent-2)" }}>view tx →</a></div>}
+            {txHash && <div className="hint good" style={{ marginBottom: 10 }}>Broadcast ✓ <a href={`${ACTIVE_EXPLORER}/tx/${txHash}`} target="_blank" rel="noopener noreferrer" style={{ color: "var(--accent-2)" }}>view tx →</a></div>}
             <button className="btn btn-primary btn-block" disabled={busy} onClick={onSend}>{busy ? "Signing & broadcasting…" : "Sign & send"}</button>
           </div>
         )}

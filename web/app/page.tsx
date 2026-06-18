@@ -7,6 +7,7 @@ import { Coin } from "@/components/Coin";
 import { Icon } from "@/components/icons";
 import { AnimatedNumber } from "@/components/AnimatedNumber";
 import { ConnectGate } from "@/components/ConnectGate";
+import { ACTIVE_LABEL } from "@/lib/config";
 
 export default function Dashboard() {
   const { tokens, totalUsd, loading, address, connected, refresh } = useWallet();
@@ -15,7 +16,7 @@ export default function Dashboard() {
   return (
     <div className="view">
       <section className="hero glass">
-        <div className="hero-label">Total balance · Base Sepolia (testnet)</div>
+        <div className="hero-label">Total balance · {ACTIVE_LABEL}</div>
         <h1 className="balance"><AnimatedNumber value={totalUsd} format={fmtUsd} /></h1>
         <div className="muted">
           {connected ? `Connected · ${address?.slice(0, 6)}…${address?.slice(-4)}` : "No wallet connected"}{loading ? " · refreshing…" : ""}

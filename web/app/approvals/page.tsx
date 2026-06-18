@@ -8,7 +8,7 @@ import { shortAddr } from "@lumen/core";
 import { useWallet } from "@/components/WalletProvider";
 import { Icon } from "@/components/icons";
 
-const EXPLORER = "https://sepolia.basescan.org";
+import { ACTIVE_EXPLORER as EXPLORER } from "@/lib/config";
 
 export default function ApprovalsScreen() {
   const { showToast } = useWallet();

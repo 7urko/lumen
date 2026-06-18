@@ -13,28 +13,36 @@
  * self-hosted bundler (see BUNDLER.md). Reads (address, deployment, balance) need
  * only the RPC.
  */
-import { createPublicClient, http, type Address, type Hex } from "viem";
-import { baseSepolia } from "viem/chains";
+import { createPublicClient, http, isHex, type Address, type Hex } from "viem";
 import {
   createWebAuthnCredential, toWebAuthnAccount, toCoinbaseSmartAccount, createBundlerClient,
   type P256Credential,
 } from "viem/account-abstraction";
+import { ACTIVE_VIEM_CHAIN, ACTIVE_RPC } from "./config";
 
-const RPC = process.env.NEXT_PUBLIC_BASE_SEPOLIA_RPC ?? "https://sepolia.base.org";
 const BUNDLER = process.env.NEXT_PUBLIC_BUNDLER_URL ?? "";
 const STORE = "lumen.smart.v0";
 
 export interface StoredCredential { id: string; publicKey: Hex }
 
 function publicClient() {
-  return createPublicClient({ chain: baseSepolia, transport: http(RPC) });
+  return createPublicClient({ chain: ACTIVE_VIEM_CHAIN, transport: http(ACTIVE_RPC) });
+}
+
+/** Shape-check a stored credential so a tampered localStorage entry is rejected (L5). */
+function isValidCredential(c: unknown): c is StoredCredential {
+  if (!c || typeof c !== "object") return false;
+  const { id, publicKey } = c as Record<string, unknown>;
+  return typeof id === "string" && id.length > 0 && typeof publicKey === "string" && isHex(publicKey);
 }
 
 export function loadCredential(): StoredCredential | null {
   if (typeof window === "undefined") return null;
   try {
     const s = localStorage.getItem(STORE);
-    return s ? (JSON.parse(s) as StoredCredential) : null;
+    if (!s) return null;
+    const parsed: unknown = JSON.parse(s);
+    return isValidCredential(parsed) ? parsed : null;
   } catch {
     return null;
   }

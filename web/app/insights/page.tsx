@@ -4,6 +4,7 @@ import { fmtUsd } from "@lumen/core";
 import { useWallet } from "@/components/WalletProvider";
 import { Coin } from "@/components/Coin";
 import { ConnectGate } from "@/components/ConnectGate";
+import { ACTIVE_LABEL } from "@/lib/config";
 
 export default function InsightsScreen() {
   const { tokens, totalUsd, connected } = useWallet();
@@ -11,7 +12,7 @@ export default function InsightsScreen() {
 
   return (
     <div className="view">
-      <div className="view-head"><h2>Insights</h2><p className="muted">Real allocation across your connected wallet (Base Sepolia). (Cost-basis P&amp;L needs a price-history indexer — not shipped.)</p></div>
+      <div className="view-head"><h2>Insights</h2><p className="muted">Real allocation across your connected wallet ({ACTIVE_LABEL}). (Cost-basis P&amp;L needs a price-history indexer — not shipped.)</p></div>
       <ConnectGate connected={connected}>
         <div className="card glass" style={{ marginBottom: 18 }}>
           <div className="hero-label">Holdings value</div>

@@ -10,7 +10,7 @@ import {
 import { useWallet } from "@/components/WalletProvider";
 import { Icon } from "@/components/icons";
 
-const EXPLORER = "https://sepolia.basescan.org";
+import { ACTIVE_EXPLORER as EXPLORER, ACTIVE_LABEL } from "@/lib/config";
 
 export default function SmartAccountScreen() {
   const { showToast } = useWallet();
@@ -72,7 +72,7 @@ export default function SmartAccountScreen() {
     <div className="view" style={{ maxWidth: 640 }}>
       <div className="view-head">
         <h2>Smart account <span className="chip active" style={{ marginLeft: 8, verticalAlign: "middle" }}>ERC-4337 · passkey</span></h2>
-        <p className="muted">The real no-seed-phrase account: a passkey-owned Coinbase Smart Wallet on Base Sepolia. No private key is stored — your passkey is the signer, verified on-chain.</p>
+        <p className="muted">The real no-seed-phrase account: a passkey-owned Coinbase Smart Wallet on {ACTIVE_LABEL}. No private key is stored — your passkey is the signer, verified on-chain.</p>
       </div>
 
       <div className="verdict safe" style={{ marginTop: 0 }}>

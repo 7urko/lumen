@@ -7,14 +7,14 @@ import { isAddress } from "@/lib/chain";
 import type { Address, Hex } from "viem";
 import {
   hasVault, getAddress, isUnlocked, lock, createVault, unlock, removeVault, getBalance, sendTestEth,
+  passwordStrength, onAutoLock,
 } from "@/lib/account";
 import { useWallet } from "@/components/WalletProvider";
 import { Icon } from "@/components/icons";
 import { SwapCard } from "@/components/SwapCard";
 import { RecipientField } from "@/components/RecipientField";
 import { recordRecipient } from "@/lib/scam-onchain";
-
-const EXPLORER = "https://sepolia.basescan.org";
+import { ACTIVE_EXPLORER as EXPLORER, ACTIVE_LABEL, IS_MAINNET } from "@/lib/config";
 
 type Stage = "loading" | "create" | "locked" | "unlocked";
 
@@ -46,6 +46,15 @@ export default function AccountScreen() {
     }
   }, []);
 
+  // M2 — react to idle/visibility auto-lock by flipping to the locked view.
+  useEffect(() => onAutoLock(() => {
+    setStage((s) => (s === "unlocked" ? "locked" : s));
+    setBalance(null);
+    showToast("Auto-locked for your security");
+  }), [showToast]);
+
+  const strength = passwordStrength(pw);
+
   useEffect(() => {
     if (stage === "unlocked" && address) {
       void refresh(address);
@@ -55,7 +64,7 @@ export default function AccountScreen() {
 
   async function onCreate() {
     setErr("");
-    if (pw.length < 8) { setErr("Use a password of at least 8 characters"); return; }
+    if (!strength.acceptable) { setErr(strength.issues[0] ?? "Choose a stronger password"); return; }
     if (pw !== pw2) { setErr("Passwords don't match"); return; }
     setBusy(true);
     try {
@@ -101,7 +110,7 @@ export default function AccountScreen() {
   return (
     <div className="view" style={{ maxWidth: 600 }}>
       <div className="view-head">
-        <h2>Account <span className="chip active" style={{ marginLeft: 8, verticalAlign: "middle" }}>Base Sepolia · encrypted</span></h2>
+        <h2>Account <span className="chip active" style={{ marginLeft: 8, verticalAlign: "middle" }}>{ACTIVE_LABEL} · encrypted</span></h2>
         <p className="muted">A real, self-built wallet on testnet. Your key is generated in your browser and stored <b>encrypted</b> (AES-256, unlocked by your password) — never in the clear, never sent anywhere.</p>
       </div>
 
@@ -126,10 +135,28 @@ export default function AccountScreen() {
         </div>
       </div>
 
-      {stage === "create" && (
+      {stage === "create" && IS_MAINNET && (
         <div className="card glass" style={{ marginTop: 18 }}>
-          <p className="muted" style={{ marginBottom: 14 }}>Set a password to encrypt your new wallet. You&apos;ll enter it to unlock and sign.</p>
-          <div className="field"><label>Password</label><input className="input" type="password" value={pw} onChange={(e) => setPw(e.target.value)} placeholder="At least 8 characters" /></div>
+          <p className="muted">On mainnet, the password-encrypted browser wallet is disabled — a key kept in the browser isn&apos;t safe for real funds. Use the passkey <b>Smart Account</b> above to hold real ETH.</p>
+        </div>
+      )}
+
+      {stage === "create" && !IS_MAINNET && (
+        <div className="card glass" style={{ marginTop: 18 }}>
+          <p className="muted" style={{ marginBottom: 14 }}>Set a strong password to encrypt your new wallet. You&apos;ll enter it to unlock and sign. It can&apos;t be recovered, so use your password manager.</p>
+          <div className="field"><label>Password</label><input className="input" type="password" value={pw} onChange={(e) => setPw(e.target.value)} placeholder="At least 12 characters, mixed types" /></div>
+          {pw && (
+            <div style={{ margin: "-6px 0 12px" }}>
+              <div style={{ display: "flex", gap: 4, marginBottom: 6 }}>
+                {[0, 1, 2, 3].map((i) => (
+                  <div key={i} style={{ flex: 1, height: 4, borderRadius: 2, background: i < strength.score ? (strength.score >= 4 ? "var(--good, #36d399)" : strength.score >= 3 ? "var(--accent-2, #7aa2ff)" : "var(--warn, #f5a524)") : "rgba(255,255,255,0.12)" }} />
+                ))}
+              </div>
+              <div className="hint" style={{ color: strength.acceptable ? "var(--good, #36d399)" : "var(--muted)" }}>
+                {strength.label}{strength.issues.length ? ` · ${strength.issues[0]}` : strength.acceptable ? " · good to go" : ""}
+              </div>
+            </div>
+          )}
           <div className="field"><label>Confirm password</label><input className="input" type="password" value={pw2} onChange={(e) => setPw2(e.target.value)} /></div>
           {err && <div className="hint bad" style={{ marginBottom: 10 }}>{err}</div>}
           <button className="btn btn-primary btn-block" disabled={busy} onClick={onCreate}>{busy ? "Encrypting…" : "Create encrypted wallet"}</button>
@@ -155,7 +182,7 @@ export default function AccountScreen() {
               <button className="iconbtn" onClick={() => { navigator.clipboard?.writeText(address); showToast("Address copied"); }} aria-label="Copy"><Icon name="copy" size={18} /></button>
             </div>
             <div style={{ display: "flex", gap: 28, justifyContent: "center", flexWrap: "wrap" }}>
-              <div style={{ textAlign: "center" }}><div className="muted" style={{ fontSize: 12 }}>Balance (Sepolia)</div><div style={{ fontWeight: 700, fontSize: 18 }}>{balance == null ? "…" : `${balance.toFixed(5)} ETH`}</div></div>
+              <div style={{ textAlign: "center" }}><div className="muted" style={{ fontSize: 12 }}>Balance</div><div style={{ fontWeight: 700, fontSize: 18 }}>{balance == null ? "…" : `${balance.toFixed(5)} ETH`}</div></div>
             </div>
             <div style={{ display: "flex", gap: 10, flexWrap: "wrap", justifyContent: "center" }}>
               <button className="btn" onClick={() => address && refresh(address)}>Refresh</button>

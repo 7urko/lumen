@@ -1,0 +1,11 @@
+{
+  "_comment": "Alto (ERC-4337 bundler) config for BASE MAINNET. Copy to alto-config.json and fill in a FUNDED relay key that holds REAL ETH (it pays gas for every UserOperation and is reimbursed by the op). EntryPoint v0.6 (0x5FF1...2789) is the same address on every chain and is what the Coinbase Smart Wallet uses.",
+  "entrypoints": "0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789",
+  "rpc-url": "https://mainnet.base.org",
+  "executor-private-keys": "0xREPLACE_WITH_FUNDED_MAINNET_RELAY_PRIVATE_KEY",
+  "utility-private-key": "0xREPLACE_WITH_FUNDED_MAINNET_RELAY_PRIVATE_KEY",
+  "min-balance": "100000000000000000",
+  "chain-type": "op-stack",
+  "safe-mode": true,
+  "port": 4337
+}

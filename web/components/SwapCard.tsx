@@ -5,12 +5,12 @@ import { SWAP_TOKENS, swapKind, quote, swap, type SwapSym } from "@/lib/swap-onc
 import { useWallet } from "./WalletProvider";
 import { Icon } from "./icons";
 
-const EXPLORER = "https://sepolia.basescan.org";
+import { ACTIVE_EXPLORER as EXPLORER, ACTIVE_LABEL } from "@/lib/config";
 
 function friendly(e: unknown, isDex: boolean): string {
   const m = e instanceof Error ? e.message : String(e);
   if (isDex && /revert|reverted|execution|unexpected|0x$/i.test(m)) {
-    return "No Uniswap pool / liquidity for this pair on Base Sepolia (testnet pools are often empty). ETH↔WETH always works.";
+    return `No Uniswap pool / liquidity for this pair on ${ACTIVE_LABEL}. ETH↔WETH always works.`;
   }
   return m.split("\n")[0]!.slice(0, 160);
 }
@@ -66,7 +66,7 @@ export function SwapCard() {
         {kind === "invalid" ? "Pick two different tokens. ETH↔USDC: wrap to WETH first."
           : kind === "wrap" ? "Wrap ETH → WETH (1:1, always works on testnet)."
           : kind === "unwrap" ? "Unwrap WETH → ETH (1:1, always works on testnet)."
-          : "Uniswap v3 swap — real, but needs a funded pool on Base Sepolia."}
+          : `Uniswap v3 swap — real, but needs a funded pool on ${ACTIVE_LABEL}.`}
         {out != null && <> · est. out: <b>{out} {to}</b></>}
       </div>
 

@@ -10,6 +10,7 @@ import { GasWidget } from "./GasWidget";
 import { CommandPalette } from "./CommandPalette";
 import { Tour } from "./Tour";
 import { RejectionGuard } from "./RejectionGuard";
+import { ACTIVE_LABEL } from "@/lib/config";
 import { applyAccent, getAccentName } from "@/lib/theme";
 
 export function Shell({ children }: { children: ReactNode }) {
@@ -39,7 +40,7 @@ export function Shell({ children }: { children: ReactNode }) {
         </header>
         <main>{children}</main>
         {toast && <div className="toast">{toast}</div>}
-        <div className="demo-banner">Lumen is non-custodial · you hold your keys · no KYC · live on Base Sepolia testnet</div>
+        <div className="demo-banner">Lumen is non-custodial · you hold your keys · no KYC · live on {ACTIVE_LABEL}</div>
       </div>
       <CommandPalette />
       <Tour />

@@ -1,11 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { ACTIVE_LABEL } from "@/lib/config";
 
 const KEY = "lumen.tour.v1";
 const STEPS = [
   { title: "Welcome to Lumen", body: "A non-custodial, no-KYC wallet — you hold your keys, we never touch your funds. Here's a 20-second tour." },
-  { title: "Your real wallet", body: "“Account” creates a real, password-encrypted wallet on Base Sepolia — real send, real swap, ENS names and QR scan included." },
+  { title: "Your real wallet", body: `Your passkey Smart Account is a real wallet on ${ACTIVE_LABEL} — real send, real swap, ENS names and QR scan included, with no seed phrase and no stored key.` },
   { title: "Scam Shield, built in", body: "Before any send, Lumen checks the recipient on-chain — contract or person? first time? unlimited approval? — on by default, no third party." },
   { title: "Approvals & Health", body: "Revoke risky token approvals in one place, and check your Wallet Health security score out of 100." },
   { title: "Private by default", body: "No analytics, no tracking, no accounts. The Privacy screen proves exactly what leaves your device. Tip: press ⌘K / Ctrl-K anywhere to jump around." },

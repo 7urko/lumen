@@ -1,25 +1,30 @@
 /**
- * Real on-chain swaps on Base Sepolia — viem + Uniswap v3 + WETH9. No third party.
+ * Real on-chain swaps on the active chain — viem + Uniswap v3 + WETH9. No third party.
  *
  *  - ETH <-> WETH: a 1:1 wrap/unwrap via WETH9. Needs no liquidity, ALWAYS works.
  *  - WETH <-> USDC: a real Uniswap v3 swap (QuoterV2 quote, SwapRouter02 trade).
- *    Real, but needs a funded pool on Base Sepolia; with no liquidity it reverts
- *    and we surface that clearly.
+ *    Needs a funded pool; with no liquidity it reverts and we surface that clearly.
  *
+ * All addresses + the fee tier come from config.ts (verified per chain — ADDRESSES.md),
+ * so this works on testnet today and Base mainnet behind the same switch.
  * Signed by the unlocked encrypted vault (account.ts). Quotes use the public RPC.
  */
 import { createWalletClient, http, parseUnits, formatUnits, type Address, type Hex } from "viem";
-import { baseSepolia } from "viem/chains";
 import { client } from "./chain";
 import { unlockedSigner } from "./account";
+import { ACTIVE_CHAIN, ACTIVE_VIEM_CHAIN, ACTIVE_RPC, SWAP_ADDRS } from "./config";
 
-const RPC = process.env.NEXT_PUBLIC_BASE_SEPOLIA_RPC ?? "https://sepolia.base.org";
+const WETH = SWAP_ADDRS.WETH;
+const USDC = SWAP_ADDRS.USDC;
+const ROUTER = SWAP_ADDRS.ROUTER;
+const QUOTER = SWAP_ADDRS.QUOTER;
+const FEE = SWAP_ADDRS.FEE;
 
-const WETH = "0x4200000000000000000000000000000000000006" as const;
-const USDC = "0x036CbD53842c5426634e7929541eC2318f3dCF7e" as const;
-const ROUTER = "0x94cC0AaC535CCDB3C01d6787D6413C739ae12bc4" as const;
-const QUOTER = "0xC5290058841028F1614F3A6F0F5816cAd0df5E27" as const;
-const FEE = 3000;
+/** Clamp slippage to a sane band so a bad caller value can't drive minOut→0 (L4). */
+function clampSlippage(pct: number): number {
+  if (!Number.isFinite(pct)) return 1;
+  return Math.min(50, Math.max(0.05, pct));
+}
 
 export type SwapSym = "ETH" | "WETH" | "USDC";
 export interface SwapToken { sym: SwapSym; name: string; decimals: number; address?: Address }
@@ -65,7 +70,7 @@ function tok(sym: SwapSym): SwapToken { return SWAP_TOKENS.find((t) => t.sym ===
 function wallet() {
   const account = unlockedSigner();
   if (!account) throw new Error("Wallet is locked — unlock first");
-  return createWalletClient({ account, chain: baseSepolia, transport: http(RPC) });
+  return createWalletClient({ account, chain: ACTIVE_VIEM_CHAIN, transport: http(ACTIVE_RPC) });
 }
 
 export async function quote(inSym: SwapSym, outSym: SwapSym, amount: string): Promise<string> {
@@ -74,7 +79,7 @@ export async function quote(inSym: SwapSym, outSym: SwapSym, amount: string): Pr
   if (kind === "wrap" || kind === "unwrap") return amount;
   const tin = tok(inSym), tout = tok(outSym);
   const amountIn = parseUnits(amount, tin.decimals);
-  const { result } = await client("baseSepolia").simulateContract({
+  const { result } = await client(ACTIVE_CHAIN).simulateContract({
     address: QUOTER, abi: QUOTER_ABI, functionName: "quoteExactInputSingle",
     args: [{ tokenIn: tin.address!, tokenOut: tout.address!, amountIn, fee: FEE, sqrtPriceLimitX96: 0n }],
   });
@@ -92,7 +97,7 @@ export async function swap(inSym: SwapSym, outSym: SwapSym, amount: string, slip
 
   const tin = tok(inSym), tout = tok(outSym);
   const amountIn = parseUnits(amount, tin.decimals);
-  const pub = client("baseSepolia");
+  const pub = client(ACTIVE_CHAIN);
 
   const allowance = await pub.readContract({ address: tin.address!, abi: ERC20_ABI, functionName: "allowance", args: [me, ROUTER] });
   if (allowance < amountIn) {
@@ -100,11 +105,16 @@ export async function swap(inSym: SwapSym, outSym: SwapSym, amount: string, slip
     await pub.waitForTransactionReceipt({ hash: approveHash });
   }
 
+  // Quote is taken immediately before the swap; minOut (from this fresh quote, minus
+  // clamped slippage) is the value-protection. SwapRouter02 is deadline-less by design
+  // (deadline was removed vs the v1 router), so minOut is the guard against a stale or
+  // sandwiched execution — keep slippage tight. (L1/L4)
+  const slip = clampSlippage(slippagePct);
   const { result } = await pub.simulateContract({
     address: QUOTER, abi: QUOTER_ABI, functionName: "quoteExactInputSingle",
     args: [{ tokenIn: tin.address!, tokenOut: tout.address!, amountIn, fee: FEE, sqrtPriceLimitX96: 0n }],
   });
-  const minOut = (result[0] * BigInt(Math.round((100 - slippagePct) * 100))) / 10000n;
+  const minOut = (result[0] * BigInt(Math.round((100 - slip) * 100))) / 10000n;
 
   return w.writeContract({
     address: ROUTER, abi: ROUTER_ABI, functionName: "exactInputSingle",

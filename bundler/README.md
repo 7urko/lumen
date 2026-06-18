@@ -52,11 +52,36 @@ pnpm install && pnpm build:all
 ./alto run --config /path/to/alto-config.json
 ```
 
+## Going to mainnet (Base)
+
+Use **`alto-config.mainnet.example.json`** instead of the Sepolia one. What changes:
+
+- **`rpc-url`** → `https://mainnet.base.org` (or, strongly recommended, **your own Base node** so you
+  get `debug_traceCall` and can keep `safe-mode: true`).
+- **Relay key holds REAL ETH.** The bundler fronts gas for every UserOperation out of this key and is
+  reimbursed by the op. Fund it with real ETH on Base and keep it topped up (`min-balance` is set to
+  0.1 ETH so it warns/stops before running dry). Treat this key like an operational hot wallet:
+  dedicated, minimally funded, monitored, rotatable.
+- **EntryPoint is unchanged** — `0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789` (v0.6) is the same address
+  on Base mainnet.
+- Point the app at it: set `NEXT_PUBLIC_BUNDLER_URL=https://your-bundler-host` in the web app's
+  environment (alongside `NEXT_PUBLIC_CHAIN=base`). Put the bundler behind HTTPS + a domain you control.
+
+```bash
+cd bundler
+copy alto-config.mainnet.example.json alto-config.json   # cp on macOS/Linux
+#   -> paste your FUNDED mainnet relay key into executor-private-keys + utility-private-key
+docker compose up --build
+```
+
+**Gasless onboarding** still additionally needs a **paymaster** (a contract you deploy + fund with
+ETH). Basic sending works without it — the user just pays their own gas. Add the paymaster after
+sending is proven on mainnet.
+
 ## Notes / honesty
 
 - **Unverified here:** this setup was written against Alto's current docs but not run in this
-  environment. Check `./alto help` for the exact flag names if a key was renamed upstream, and pin the
-  `git clone` to a known commit for production.
-- **Gasless onboarding** (the demo's pitch) additionally needs a **paymaster** (also self-hostable / a
-  contract you deploy and fund). That's the next step after basic sending works.
-- **Testnet only.** Audit the smart-account + paymaster + recovery contracts before mainnet.
+  environment. Check `./alto help` for the exact flag names if a key was renamed upstream, and **pin the
+  `git clone` / Docker image to a known commit for production.**
+- The relay key is the one piece of real operational risk in the self-hosted path — secure it
+  accordingly (secrets manager, not a committed file; the `.gitignore` already excludes `alto-config.json`).

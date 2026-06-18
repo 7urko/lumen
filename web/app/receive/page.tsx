@@ -5,6 +5,7 @@ import QRCode from "qrcode";
 import { useWallet } from "@/components/WalletProvider";
 import { Icon } from "@/components/icons";
 import { ConnectGate } from "@/components/ConnectGate";
+import { ACTIVE_LABEL } from "@/lib/config";
 
 export default function ReceiveScreen() {
   const { address, connected, showToast } = useWallet();
@@ -15,7 +16,7 @@ export default function ReceiveScreen() {
 
   return (
     <div className="view" style={{ maxWidth: 600 }}>
-      <div className="view-head"><h2>Receive</h2><p className="muted">Your real wallet address on Base Sepolia. Share it to get paid.</p></div>
+      <div className="view-head"><h2>Receive</h2><p className="muted">Your real wallet address on {ACTIVE_LABEL}. Share it to get paid.</p></div>
       <ConnectGate connected={connected}>
         <div className="card glass qr-wrap">
           <div className="qr"><canvas ref={ref} /></div>

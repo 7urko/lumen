@@ -5,8 +5,7 @@ import type { Address } from "viem";
 import type { Token, Contact, Alert, Guardian, Directory } from "@lumen/core";
 import { activeAddress, activeKind, type WalletKind } from "@/lib/wallet";
 import { getPortfolio, type ChainKey } from "@/lib/chain";
-
-const CHAIN: ChainKey = "baseSepolia";
+import { ACTIVE_CHAIN as CHAIN } from "@/lib/config";
 const TV: Record<string, string> = { ETH: "BINANCE:ETHUSDT", WETH: "BINANCE:ETHUSDT", cbETH: "COINBASE:CBETHUSD" };
 
 interface WalletState {

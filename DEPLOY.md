@@ -34,10 +34,39 @@ Netlify, Cloudflare Pages, a VPS, etc. (Same env vars apply.)
 
 These are the operational/legal items from `COMPLIANCE.md`, none of which block a private/testnet deploy:
 
-- **Strict CSP + security headers** (allow-list the RPC, fonts, TradingView). Crypto sites are prime
-  phishing-clone targets.
+- **Strict CSP + security headers** — DONE (nonce CSP in `web/middleware.ts`; see `SECURITY-REVIEW.md`).
 - **Sanctions geo-block** of prohibited jurisdictions.
 - **Terms of Service + Privacy Policy** stating the non-custodial, no-KYC, "we can't recover your keys"
   nature.
 - A short **crypto/fintech lawyer** consult for your jurisdiction(s).
 - Keep it on **testnet** until the smart-account/paymaster path is audited (see `GOING-LIVE.md`).
+
+## Going to mainnet — the one-variable flip
+
+The whole app reads its active chain from `web/lib/config.ts`, which **defaults to Base
+Sepolia**. Going live is a single environment variable:
+
+```
+NEXT_PUBLIC_CHAIN=base
+```
+
+Set it (locally in `.env.local`, or in Vercel → Settings → Environment Variables) and the
+entire wallet — balances, send, swap, approvals, Scam Shield, explorer links, network
+labels — switches to **Base mainnet** with the verified addresses in `ADDRESSES.md`.
+Leaving it unset (or anything other than `base`) stays on testnet.
+
+**Do NOT flip it until ALL of these are true** — the switch is the *last* step:
+
+1. **`npm run build -w web` is green** and a `npm run dev` smoke test passes (watch the
+   console for CSP violations; confirm send / swap / approvals on testnet first).
+2. **The ERC-4337 bundler (and paymaster) is running** and `NEXT_PUBLIC_BUNDLER_URL`
+   points at it — the passkey smart account can't send without it (see `BUNDLER.md`).
+3. **The audit sign-off and Terms/Privacy** are in place (per `COMPLIANCE.md`).
+4. You've re-confirmed the remaining ⚠️ token addresses in `ADDRESSES.md`.
+
+Already wired for mainnet safety: the password-encrypted **browser EOA is disabled on
+mainnet** (users are pushed to the passkey smart account), and the swap uses the
+deep-liquidity 0.05% WETH/USDC pool on Base.
+
+> When it's time, **you** make the first real-money send yourself — I prep everything up
+> to it, but I don't move funds.

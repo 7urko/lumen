@@ -64,7 +64,12 @@ export function Sidebar() {
       </nav>
       <div className="sb-foot">
         <Link href="/welcome" className="sb-demo" style={{ display: "block", marginBottom: 8 }}>View onboarding flow →</Link>
-        <div className="sb-demo">Demo · mock data · no real funds</div>
+        <div className="sb-demo" style={{ marginBottom: 6 }}>
+          <Link href="/legal/terms" style={{ color: "inherit" }}>Terms</Link>
+          {" · "}
+          <Link href="/legal/privacy" style={{ color: "inherit" }}>Privacy</Link>
+        </div>
+        <div className="sb-demo">Non-custodial · you hold your keys · no KYC</div>
       </div>
     </aside>
   );
