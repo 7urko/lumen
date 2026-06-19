@@ -2,10 +2,10 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import QRCode from "qrcode";
-import type { Address } from "viem";
+import type { Address, Hex } from "viem";
 import {
   hasSmartWallet, registerSmartWalletPasskey, getSmartAddress, isDeployed,
-  getSmartBalanceEth, clearCredential, bundlerConfigured,
+  getSmartBalanceEth, clearCredential, bundlerConfigured, paymasterConfigured, sendSmartTx,
 } from "@/lib/smart-account";
 import { useWallet } from "@/components/WalletProvider";
 import { Icon } from "@/components/icons";
@@ -19,8 +19,10 @@ export default function SmartAccountScreen() {
   const [balance, setBalance] = useState<number | null>(null);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState("");
+  const [txHash, setTxHash] = useState<Hex | null>(null);
   const qrRef = useRef<HTMLCanvasElement>(null);
   const bundlerOn = bundlerConfigured();
+  const gaslessOn = paymasterConfigured();
 
   const refresh = useCallback(async (addr: Address) => {
     try {
@@ -59,6 +61,21 @@ export default function SmartAccountScreen() {
       void refresh(addr);
     } catch (e) {
       setErr(e instanceof Error ? e.message : "Passkey registration failed or was cancelled");
+    } finally { setBusy(false); }
+  }
+
+  async function gaslessTest() {
+    if (!address) return;
+    setBusy(true); setErr(""); setTxHash(null);
+    try {
+      // A 0-value self-call: deploys the account and proves the full
+      // passkey → bundler → paymaster pipeline, with gas sponsored (no funds needed).
+      const hash = await sendSmartTx(address, 0n);
+      setTxHash(hash);
+      showToast("Gasless transaction sent");
+      void refresh(address);
+    } catch (e) {
+      setErr(e instanceof Error ? e.message : "Gasless test failed");
     } finally { setBusy(false); }
   }
 
@@ -113,13 +130,22 @@ export default function SmartAccountScreen() {
 
           <div className="card glass" style={{ marginTop: 18 }}>
             <div className="section-title" style={{ marginTop: 0 }}>Send (gasless · ERC-4337)</div>
-            {bundlerOn ? (
-              <p className="muted">Bundler configured. Sending a UserOperation flow can be enabled here.</p>
+            {!bundlerOn ? (
+              <p className="muted">
+                Sending needs an ERC-4337 <b>bundler</b> to relay your UserOperation. Set
+                <code>NEXT_PUBLIC_BUNDLER_URL</code> (see BUNDLER.md), then this becomes a real send.
+              </p>
+            ) : gaslessOn ? (
+              <>
+                <p className="muted" style={{ marginBottom: 12 }}>Gas is sponsored by the paymaster — send a real transaction with <b>no funds at all</b>. This deploys your account on-chain and proves the full passkey → bundler → paymaster flow.</p>
+                <button className="btn btn-primary btn-block" disabled={busy} onClick={gaslessTest}>{busy ? "Signing & sending…" : "Send a gasless test transaction"}</button>
+                {err && <div className="hint bad" style={{ marginTop: 10 }}>{err}</div>}
+                {txHash && <div className="hint good" style={{ marginTop: 10 }}>Sent ✓ <a href={`${EXPLORER}/tx/${txHash}`} target="_blank" rel="noopener noreferrer" style={{ color: "var(--accent-2)" }}>view tx →</a></div>}
+              </>
             ) : (
               <p className="muted">
-                Sending needs a self-hosted ERC-4337 <b>bundler</b> to relay your UserOperation. Stand one up
-                (alto / rundler / silius), set <code>NEXT_PUBLIC_BUNDLER_URL</code>, and this becomes a real gasless
-                send. See <b>BUNDLER.md</b>. This is the one piece of infrastructure to run yourself — no SaaS required.
+                Bundler configured. For <b>gasless</b> sends (no funds needed), set a Pimlico sponsorship-policy id in
+                <code>NEXT_PUBLIC_PAYMASTER_POLICY</code>. Otherwise fund the account with a little ETH and use the Send screen.
               </p>
             )}
           </div>

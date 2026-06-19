@@ -16,11 +16,15 @@
 import { createPublicClient, http, isHex, type Address, type Hex } from "viem";
 import {
   createWebAuthnCredential, toWebAuthnAccount, toCoinbaseSmartAccount, createBundlerClient,
-  type P256Credential,
+  createPaymasterClient, type P256Credential,
 } from "viem/account-abstraction";
 import { ACTIVE_VIEM_CHAIN, ACTIVE_RPC } from "./config";
 
 const BUNDLER = process.env.NEXT_PUBLIC_BUNDLER_URL ?? "";
+// Gas sponsorship (gasless). Pimlico serves bundler + paymaster on the same URL, so
+// PAYMASTER defaults to the bundler URL. A sponsorship-policy id enables sponsorship.
+const PAYMASTER = process.env.NEXT_PUBLIC_PAYMASTER_URL ?? BUNDLER;
+const POLICY = process.env.NEXT_PUBLIC_PAYMASTER_POLICY ?? "";
 const STORE = "lumen.smart.v0";
 
 export interface StoredCredential { id: string; publicKey: Hex }
@@ -82,10 +86,27 @@ export async function getSmartBalanceEth(address: Address): Promise<number> {
   return Number(wei) / 1e18;
 }
 
-/** Send a gasless smart-account transaction via the bundler. Requires a bundler URL. */
+/** Whether gasless sponsorship is configured (paymaster + a sponsorship policy). */
+export function paymasterConfigured(): boolean { return POLICY.length > 0; }
+
+/**
+ * Send a smart-account transaction via the bundler.
+ * If a sponsorship policy is set, the paymaster sponsors gas (gasless) and the account
+ * needs no ETH. Otherwise the account pays its own gas (it must hold ETH).
+ */
 export async function sendSmartTx(to: Address, valueWei: bigint): Promise<Hex> {
   if (!BUNDLER) throw new Error("No bundler configured — set NEXT_PUBLIC_BUNDLER_URL (see BUNDLER.md)");
   const account = await getSmartAccount();
+
+  if (POLICY) {
+    const paymaster = createPaymasterClient({ transport: http(PAYMASTER) });
+    const bundler = createBundlerClient({
+      account, client: publicClient(), transport: http(BUNDLER),
+      paymaster, paymasterContext: { sponsorshipPolicyId: POLICY },
+    });
+    return bundler.sendUserOperation({ account, calls: [{ to, value: valueWei }] });
+  }
+
   const bundler = createBundlerClient({ account, client: publicClient(), transport: http(BUNDLER) });
   return bundler.sendUserOperation({ account, calls: [{ to, value: valueWei }] });
 }
